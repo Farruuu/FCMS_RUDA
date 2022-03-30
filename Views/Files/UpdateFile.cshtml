@@ -1,0 +1,415 @@
+﻿@model BLL.DocumentViewModel
+
+@{
+    ViewData["Title"] = "Update Document";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <form asp-action="UpdateFile" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                @*<div class="card-header pb-0">
+                        <div class="d-flex align-items-center">
+                            <p class="mb-0">Update File</p>
+                        </div>
+                    </div>*@
+                <div class="card-body">
+                    <div class="row">
+                        <input asp-for="Document.ID" class="form-control" type="hidden" />
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="Document.DocumentNumber" class="control-label required"></label>
+                                <input asp-for="Document.DocumentNumber" class="form-control" readonly />
+                                <span asp-validation-for="Document.DocumentNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="Document.DeptDocNumber" class="control-label required"></label>
+                                <input asp-for="Document.DeptDocNumber" class="form-control" readonly />
+                                <span asp-validation-for="Document.DeptDocNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="Document.DocumentType" class="control-label required"></label>
+                                <select asp-for="Document.DocumentType" class="form-control rounded-0" disabled>
+                                    <option value="0">Select...</option>
+                                    @foreach (var item in ViewBag.ListTypes)
+                                    {
+                                        <option value="@item.ID">@item.Description</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Document.DocumentType" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="Document.DocumentRoute" class="control-label required"></label>
+                                <select asp-for="Document.DocumentRoute" class="form-control rounded-0" id="DocumentRoute" disabled>
+                                    <option value="0">Select...</option>
+                                    <option value="1">RUDA Interdepartment</option>
+                                    <option value="2">Outwards RUDA</option>
+                                    <option value="3">Inwards RUDA</option>
+                                </select>
+                                <span asp-validation-for="Document.DocumentRoute" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label asp-for="Document.Subject" class="control-label required"></label>
+                                <input asp-for="Document.Subject" class="form-control" readonly />
+                                <span asp-validation-for="Document.Subject" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" id="txtOrignated" style="display: none;">
+                            <div class="form-group">
+                                <label asp-for="Document.OriginatedByName" class="control-label required"></label>
+                                <input asp-for="Document.OriginatedByName" class="form-control" id="OriginatedByName" readonly />
+                                <span asp-validation-for="Document.OriginatedByName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Document.OriginatedBy" class="control-label required"></label>
+                                <select asp-for="Document.OriginatedBy" class="form-control rounded-0" disabled>
+                                    <option value="0">Select...</option>
+                                    @foreach (var item in ViewBag.ListDept)
+                                    {
+                                        <option value="@item.ID">@item.Name</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Document.OriginatedBy" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Document.ReceiveBy" class="control-label required"></label>
+                                <input asp-for="Document.ReceiveBy" class="form-control" readonly />
+                                <span asp-validation-for="Document.ReceiveBy" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Document.ReceivingDate" class="control-label required"></label>
+                                <input asp-for="Document.ReceivingDate" class="form-control" type="date" disabled />
+                                <span asp-validation-for="Document.ReceivingDate" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <input asp-for="DocDetails.ID" type="hidden" value="@Model.Document.docDetails[Model.Document.docDetails.Count-1].ID" />
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="DocDetails.ReturnedDate" class="control-label"></label>
+                                <input asp-for="DocDetails.ReturnedDate" class="form-control" type="date" />
+                                <span asp-validation-for="DocDetails.ReturnedDate" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <hr />
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Document.DocumentStatus" class="control-label required"></label>
+                                <select asp-for="Document.DocumentStatus" class="form-control rounded-0">
+                                    <option value="0">Select...</option>
+                                    @foreach (var item in ViewBag.ListStatus)
+                                    {
+                                        <option value="@item.ID">@item.Description</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Document.DocumentStatus" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="DocDetails.RotationNo" class="control-label required"></label>
+                                <input asp-for="DocDetails.RotationNo" class="form-control" min="0" />
+                                <span asp-validation-for="DocDetails.RotationNo" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="DocDetails.RevisionNo" class="control-label required"></label>
+                                <input asp-for="DocDetails.RevisionNo" class="form-control" min="0" />
+                                <span asp-validation-for="DocDetails.RevisionNo" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" id="txtForwarded" style="display: none;">
+                            <div class="form-group">
+                                <label asp-for="DocDetails.ForwardedToName" class="control-label required"></label>
+                                <input asp-for="DocDetails.ForwardedToName" class="form-control" id="ForwardedToName" />
+                                <span asp-validation-for="DocDetails.ForwardedToName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="DocDetails.ForwardedTo" class="control-label required"></label>
+                                <select asp-for="DocDetails.ForwardedTo" class="form-control rounded-0" id="ForwardedTo">
+                                    <option value="0">Select...</option>
+                                    @foreach (var item in ViewBag.ListDept)
+                                    {
+                                        <option value="@item.ID">@item.Name</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="DocDetails.ForwardedTo" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="DocDetails.ForwardedDate" class="control-label required"></label>
+                                <input asp-for="DocDetails.ForwardedDate" class="form-control" type="date" id="ForwardedDate" />
+                                <span asp-validation-for="DocDetails.ForwardedDate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="DocDetails.PendingDays" class="control-label"></label>
+                                <input asp-for="DocDetails.PendingDays" class="form-control" id="PendingDays" disabled />
+                                <span asp-validation-for="DocDetails.PendingDays" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="DocDetails.CommentCode" class="control-label required"></label>
+                                <select asp-for="DocDetails.CommentCode" class="form-control rounded-0" id="CommentCode">
+                                    <option value="0">Select...</option>
+                                    @foreach (var item in ViewBag.ListCode)
+                                    {
+                                        <option value="@item.ID">@item.Code</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="DocDetails.CommentCode" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <label asp-for="DocDetails.Comments" class="control-label required"></label>
+                                <input asp-for="DocDetails.Comments" class="form-control" id="Comments" />
+                                <span asp-validation-for="DocDetails.Comments" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <label asp-for="DocDetails.Remarks" class="control-label required"></label>
+                                <input asp-for="DocDetails.Remarks" class="form-control" />
+                                <span asp-validation-for="DocDetails.Remarks" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label required">Attach File</label>
+                                <input class="form-control" type="file" id="Upload" name="Upload" onchange="fileTypeValidation()" />
+                                @*<span asp-validation-for="Remarks" class="text-danger"></span>*@
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a asp-action="Index">Back to List</a>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <div class="form-group">
+                                <input type="submit" value="Update" class="btn btn-outline-primary btn-lg" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<hr />
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <div class="row">
+                    <div class="col-6 d-flex align-items-center">
+                        <h4 class="mb-0">File History</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-sm text-primary opacity-7">Rotation No</th>
+                                <th class="text-sm text-primary opacity-7">Revision No</th>
+                                <th class="text-sm text-primary opacity-7">Forwarded To</th>
+                                <th class="text-sm text-primary opacity-7">Forwarded Date</th>
+                                <th class="text-sm text-primary opacity-7">Returned Date</th>
+                                <th class="text-sm text-primary opacity-7">Pending Days</th>
+                                <th class="text-sm text-primary opacity-7">Comment</th>
+                                <th class="text-sm text-primary opacity-7">Remarks</th>
+                                <th class="text-sm text-primary opacity-7">Attachments</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Document.docDetails)
+                            {
+                                <tr>
+                                    <td class="text-center">
+                                        <p class="text-xs font-weight-bold mb-0">@item.RotationNo</p>
+                                    </td>
+                                    <td class="text-center">
+                                        <p class="text-xs font-weight-bold mb-0">@item.RevisionNo</p>
+                                    </td>
+                                    <td class="text-center">
+                                        <p class="text-xs font-weight-bold mb-0">@item.ForwardedToName</p>
+                                    </td>
+                                    <td class="text-center">
+                                        <p class="text-xs font-weight-bold mb-0">@item.ForwardedDate.ToShortDateString()</p>
+                                    </td>
+                                    <td class="text-center">
+                                        <p class="text-xs font-weight-bold mb-0">@item.ReturnedDate.ToShortDateString()</p>
+                                    </td>
+                                    <td class="text-center">
+                                        <p class="text-xs font-weight-bold mb-0">@item.PendingDays</p>
+                                    </td>
+                                    <td class="text-center">
+                                        <p class="text-xs font-weight-bold mb-0">@item.Comments</p>
+                                    </td>
+                                    <td class="text-center">
+                                        <p class="text-xs font-weight-bold mb-0">@item.Remarks</p>
+                                    </td>
+                                    @if (ViewBag.UserRole < 3)
+                                    {
+                                        <td class="text-center">
+                                            <a onclick="DownloadFile('@Model.Document.DocumentNumber', '@item.AttachmentName');" class="text-xs font-weight-bold mb-0" data-toggle="tooltip" data-original-title="Download File">
+                                                <i class="fas fa-file-pdf text-lg me-1" aria-hidden="true"></i>   
+                                            Download
+                                            </a>
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+
+    $(document).ready(function () {
+        var selValue = $("#DocumentRoute").val();
+
+        if (selValue == "2") { //outward to another organization
+            $("#ddlForwarded").hide();
+            $("#txtForwarded").show();
+        }
+        else {
+            $("#ddlForwarded").show();
+            $("#txtForwarded").hide();
+        }
+
+        if (selValue == "3") { //inward from another Organization
+            $("#ddlOrignated").hide();
+            $("#txtOrignated").show();
+        }
+        else {
+            $("#ddlOrignated").show();
+            $("#txtOrignated").hide();
+        }
+    });
+
+    $("#CommentCode").change(function () {
+        debugger;
+
+        var selValue = $(this).val();
+        let Codeslist = @Html.Raw(Json.Serialize(ViewBag.ListCode));
+        let result = Codeslist.filter(function (x) {
+
+            return x.id == selValue;
+        });
+
+        $("#Comments").val(result[0].description);
+    });
+
+    $("#ForwardedTo").change(function () {
+        debugger;
+        var selected = $(this).find("option:selected").text();
+        $("#ForwardedToName").val(selected);
+     });
+
+    $("#ForwardedDate").change(function () {
+
+        debugger;
+        var seldate = new Date($(this).val());
+        var todaydate = new Date();
+
+        const diffTime = Math.abs(todaydate - seldate);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+        $("#PendingDays").val(diffDays);
+    });
+
+    function fileTypeValidation() {
+
+        var _validFileExtensions = [".jpg", ".jpeg", ".png", ".xlsx", ".xlx", ".doc", ".docs", ".pdf"];
+
+        var sFileName = $("#AttachedFile").val();
+        if (sFileName.length > 0) {
+            var blnValid = false;
+            for (var j = 0; j < _validFileExtensions.length; j++) {
+                var sCurExtension = _validFileExtensions[j];
+                if (sFileName.substr(sFileName.length - sCurExtension.length, sCurExtension.length).toLowerCase() == sCurExtension.toLowerCase()) {
+                    blnValid = true;
+                    break;
+                }
+            }
+
+            if (!blnValid) {
+                alert("Sorry, " + sFileName + " is invalid, allowed extensions are: " + _validFileExtensions.join(", "));
+                $("#AttachedFile").val("");
+                return false;
+            }
+        }
+    }
+
+    function DownloadFile(DocNo, FileName) {
+        $.ajax({
+            url: "@Url.Action("DownloadFile", "Files")",
+            type: "POST",
+            dataType: "json",
+            async: false,
+            cache: false,
+            data: { DocumentNo: DocNo, remoteFilename: FileName },
+            success: function (response) {
+                alert(response);
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+
+    }
+
+    @if (ViewBag.Message != null)
+    {
+        @:window.onload = function () { alert("@ViewBag.Message"); };
+    }
+
+</script>

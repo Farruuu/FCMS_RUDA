@@ -1,0 +1,88 @@
+﻿@model List<BLL.Documents>
+
+@{
+    ViewData["Title"] = "Documents List";
+}
+
+<div class="col-12">
+    <div class="card mb-4">
+        <div class="card-header pb-0">
+            <div class="row">
+                <div class="col-6 d-flex align-items-center">
+                    @*<h4 class="mb-0">Documents List</h4>*@
+                </div>
+                <div class="col-6 text-end">
+                    <a class="btn bg-gradient-dark mb-0" href="@Url.Action("AddNewFile", "Files")"><i class="fas fa-plus"></i>&nbsp;&nbsp;Add New File</a>
+
+                    @*@if (ViewBag.UserRole < 3)
+                        {
+
+                        }*@
+                </div>
+            </div>
+        </div>
+        <br />
+        <div class="card-body px-0 pt-0 pb-2">
+            <div class="table-responsive p-0">
+                <table class="table align-items-center mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-uppercase text-primary text-xs text-center font-weight-bold opacity-7">Document Number</th>
+                            <th class="text-uppercase text-primary text-xs text-center font-weight-bold opacity-7">Document Type</th>
+                            <th class="text-uppercase text-primary text-xs text-center font-weight-bold opacity-7">Originated By</th>
+                            <th class="text-uppercase text-primary text-xs text-center font-weight-bold opacity-7">Receiving Date</th>
+                            <th class="text-uppercase text-primary text-xs text-center font-weight-bold opacity-7">Document Status</th>
+                            <th class="text-uppercase text-primary text-xs text-center font-weight-bold opacity-7">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <p class="text-sm text-center font-weight-bold mb-0">@item.DocumentNumber</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-center font-weight-bold mb-0">@item.DocTypeName</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-center font-weight-bold mb-0">@item.OriginatedByName</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-center font-weight-bold mb-0">@item.ReceivingDate.ToShortDateString()</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-center font-weight-bold mb-0">@item.DocStatusName</p>
+                                </td>
+                                @if (ViewBag.UserRole < 5)
+                                {
+                                    <td class="text-center">
+
+                                        @*<a href="@Url.Action("UpdateFile","Files", new { FileID = item.ID})" class="text-xs text-secondary text-center font-weight-bold mb-0 cursor-pointer" data-toggle="tooltip" data-original-title="View File Details">
+                                                <i class="fas fa-pencil-alt ms-auto text-dark cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="" aria-hidden="true" data-bs-original-title="Update" aria-label="Update"></i>
+                                            </a>*@
+                                        <a href="@Url.Action("UpdateFile","Files", new { FileID = item.ID})" class="text-xs text-secondary text-center font-weight-bold mb-0 cursor-pointer" data-toggle="tooltip" data-original-title="View File Details">
+                                            <i class="fas fa-pencil-alt ms-auto text-dark cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="" aria-hidden="true" data-bs-original-title="Update" aria-label="Update"></i>
+                                        </a>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+    window.onload = function () {
+
+        @if (TempData["Success"] != null)
+        {
+            @:alert("@TempData["Success"]");
+        }
+    };
+</script>
+
