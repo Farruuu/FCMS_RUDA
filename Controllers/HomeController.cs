@@ -1,9 +1,11 @@
-﻿using FCMS_RUDA.Models;
+﻿using DAL;
+using FCMS_RUDA.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,7 +29,8 @@ namespace FCMS_RUDA.Controllers
                 return RedirectToAction("Logout", "Users");
             }
 
-            return View();
+            DataTable dtdashboard = new FilesDAL().GetDashboardStats();
+            return View(dtdashboard);
         }
 
         public IActionResult Privacy()

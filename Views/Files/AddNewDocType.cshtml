@@ -1,0 +1,51 @@
+﻿@model BLL.DocumentType
+
+@{
+    ViewData["Title"] = "Add Document Type";
+}
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <form asp-action="AddNewDocType">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="card-header pb-0">
+                    <div class="d-flex align-items-center">
+                        @* <p class="mb-0">Add New User</p>*@
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Description" class="form-control-label"></label>
+                                <input asp-for="Description" class="form-control">
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a asp-action="DocumentTypes">Back to List</a>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <div class="form-group">
+                                <input type="submit" value="Create" class="btn btn-outline-primary btn-lg" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+    @if (ViewBag.Message != null)
+    {
+        @:window.onload = function () { alert("@ViewBag.Message"); };
+    }
+</script>

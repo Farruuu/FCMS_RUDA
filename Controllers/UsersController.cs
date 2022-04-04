@@ -130,7 +130,6 @@ namespace FCMS_RUDA.Controllers
             }
         }
 
-
         public IActionResult UpdateUser(int UserID)
         {
             if (HttpContext.Session.GetString("Name") == null)
@@ -186,6 +185,19 @@ namespace FCMS_RUDA.Controllers
                 return View();
             }
 
+        }
+
+        public IActionResult UserRoles()
+        {
+            if (HttpContext.Session.GetString("Name") == null)
+            {
+                TempData["Session"] = "Your Session has expired. Please Login again";
+                return RedirectToAction("Logout", "Users");
+            }
+
+            List<UserRoles> roles = new UsersDAL().GetAllUserRoles();
+
+            return View(roles);
         }
 
         public IActionResult Logout()

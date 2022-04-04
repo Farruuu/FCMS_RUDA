@@ -36,6 +36,128 @@ namespace FCMS_RUDA.Controllers
             return View(FilesList);
         }
 
+        public IActionResult DocumentTypes()
+        {
+            if (HttpContext.Session.GetString("Name") == null)
+            {
+                TempData["Session"] = "Your Session has expired. Please Login again";
+                return RedirectToAction("Logout", "Users");
+            }
+
+            List<DocumentType> listtypes = new FilesDAL().GetAllDocumentTypes();
+            ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
+            return View(listtypes);
+        }
+
+        public IActionResult AddNewDocType()
+        {
+            if (HttpContext.Session.GetString("Name") == null)
+            {
+                TempData["Session"] = "Your Session has expired. Please Login again";
+                return RedirectToAction("Logout", "Users");
+            }
+
+            ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
+
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult AddNewDocType(DocumentType doctype)
+        {
+            ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
+
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View();
+                }
+
+                int UserID = Convert.ToInt32(HttpContext.Session.GetString("ID"));
+                Int64 result = new FilesDAL().CreateNewDocumentType(doctype, UserID);
+
+                if (result > 0)
+                {
+                    TempData["Success"] = "Document Type Added successfully!";
+                    return RedirectToAction("DocumentTypes");
+                }
+                else
+                {
+                    ViewBag.Message = "Error Occured while saving Record. Please Try Again!";
+                    return View();
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Message = "Error Occured while saving Record. Please Try Again!";
+                _logger.LogError(ex.Message);
+                return View();
+            }
+        }
+
+        public IActionResult UpdateDocType(int DocTypeID)
+        {
+            if (HttpContext.Session.GetString("Name") == null)
+            {
+                TempData["Session"] = "Your Session has expired. Please Login again";
+                return RedirectToAction("Logout", "Users");
+            }
+
+            DocumentType type = new FilesDAL().GetDocumentTypesByID(DocTypeID);
+            ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
+
+            return View(type);
+        }
+
+        [HttpPost]
+        public IActionResult UpdateDocType(DocumentType doctype)
+        {
+            ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
+
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View();
+                }
+
+                int UserID = Convert.ToInt32(HttpContext.Session.GetString("ID"));
+                int result = new FilesDAL().UpdateDocumentType(doctype, UserID);
+
+                if (result == 0)
+                {
+                    TempData["Success"] = "Document Type Updated successfully!";
+                    return RedirectToAction("DocumentTypes");
+                }
+                else
+                {
+                    ViewBag.Message = "Error Occured while saving Record. Please Try Again!";
+                    return View();
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Message = "Error Occured while saving Record. Please Try Again!";
+                _logger.LogError(ex.Message);
+                return View();
+            }
+        }
+
+        public IActionResult Departments()
+        {
+            if (HttpContext.Session.GetString("Name") == null)
+            {
+                TempData["Session"] = "Your Session has expired. Please Login again";
+                return RedirectToAction("Logout", "Users");
+            }
+
+            List<Departments> listDept = new UsersDAL().GetAllDepartments();
+            ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
+
+            return View(listDept);
+        }
+
         public IActionResult AddNewFile()
         {
             if (HttpContext.Session.GetString("Name") == null)
@@ -62,7 +184,7 @@ namespace FCMS_RUDA.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddNewFile(IFormFile Upload, DocumentViewModel viewModel, string Orgby, string Route, string Frwdto)
+        public IActionResult AddNewFile(IFormFile Upload, DocumentViewModel viewModel, string Orgby, string Route, string Frwdto)
         {
             List<Departments> listDept = new UsersDAL().GetAllDepartments();
             ViewBag.ListDept = listDept;

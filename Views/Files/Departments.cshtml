@@ -1,0 +1,53 @@
+﻿@model IEnumerable<BLL.Departments>
+
+@{
+    ViewData["Title"] = "Departments";
+}
+
+<div class="col-12">
+    <div class="card mb-4">
+        <div class="card-header pb-0">
+        </div>
+        <br />
+        <div class="card-body px-8 pt-0 pb-2">
+            <div class="table-responsive p-0">
+                <table class="table align-items-center mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">@Html.DisplayNameFor(model => model.ID)</th>
+                            <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">@Html.DisplayNameFor(model => model.Initials)</th>
+                            <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">@Html.DisplayNameFor(model => model.Name)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <p class="text-sm text-secondary mb-0">@item.ID</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-secondary mb-0">@item.Initials</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-weight-bold mb-0">@item.Name</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+    window.onload = function () {
+
+        @if (TempData["Success"] != null)
+        {
+            @:alert("@TempData["Success"]");
+        }
+    };
+</script>
