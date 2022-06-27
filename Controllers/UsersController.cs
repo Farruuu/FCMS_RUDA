@@ -1,8 +1,10 @@
 ﻿using BLL;
 using DAL;
+using FCMS_RUDA.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,7 +56,9 @@ namespace FCMS_RUDA.Controllers
 
                 if (objUser != null && objUser.UserStatus == 1)
                 {
-                    SetSession(objUser);
+                    List<UserPermissions> ObjPermissions = new UsersDAL().GetUserPermissions(objUser.UserRole);
+                    SetSession(objUser, ObjPermissions);
+
                     return RedirectToAction("Index", "Home");
                 }
                 else if (objUser != null && objUser.UserStatus == 0)
@@ -83,8 +87,11 @@ namespace FCMS_RUDA.Controllers
                 return RedirectToAction("Logout", "Users");
             }
 
-            List<Departments> listDept = new UsersDAL().GetAllDepartments();
+            List<Department> listDept = new UsersDAL().GetAllDepartments();
             ViewBag.ListDept = listDept;
+
+            List<Designation> listdesig = new UsersDAL().GetAllDesignations();
+            ViewBag.Listdesig = listdesig;
 
             List<UserRoles> listRoles = new UsersDAL().GetAllUserRoles();
             ViewBag.ListRoles = listRoles;
@@ -95,8 +102,11 @@ namespace FCMS_RUDA.Controllers
         [HttpPost]
         public IActionResult AddNewUser(Users user)
         {
-            List<Departments> listDept = new UsersDAL().GetAllDepartments();
+            List<Department> listDept = new UsersDAL().GetAllDepartments();
             ViewBag.ListDept = listDept;
+
+            List<Designation> listdesig = new UsersDAL().GetAllDesignations();
+            ViewBag.Listdesig = listdesig;
 
             List<UserRoles> listRoles = new UsersDAL().GetAllUserRoles();
             ViewBag.ListRoles = listRoles;
@@ -139,8 +149,11 @@ namespace FCMS_RUDA.Controllers
             }
             Users user = new UsersDAL().GetUserByID(UserID);
 
-            List<Departments> listDept = new UsersDAL().GetAllDepartments();
+            List<Department> listDept = new UsersDAL().GetAllDepartments();
             ViewBag.ListDept = listDept;
+
+            List<Designation> listdesig = new UsersDAL().GetAllDesignations();
+            ViewBag.Listdesig = listdesig;
 
             List<UserRoles> listRoles = new UsersDAL().GetAllUserRoles();
             ViewBag.ListRoles = listRoles;
@@ -151,8 +164,11 @@ namespace FCMS_RUDA.Controllers
         [HttpPost]
         public IActionResult UpdateUser(Users user)
         {
-            List<Departments> listDept = new UsersDAL().GetAllDepartments();
+            List<Department> listDept = new UsersDAL().GetAllDepartments();
             ViewBag.ListDept = listDept;
+
+            List<Designation> listdesig = new UsersDAL().GetAllDesignations();
+            ViewBag.Listdesig = listdesig;
 
             List<UserRoles> listRoles = new UsersDAL().GetAllUserRoles();
             ViewBag.ListRoles = listRoles;
@@ -200,13 +216,66 @@ namespace FCMS_RUDA.Controllers
             return View(roles);
         }
 
+        public IActionResult UserPermissions()
+        {
+            if (HttpContext.Session.GetString("Name") == null)
+            {
+                TempData["Session"] = "Your Session has expired. Please Login again";
+                return RedirectToAction("Logout", "Users");
+            }
+
+            List<UserRoles> RolesList = new UsersDAL().GetAllUserRoles();
+            ViewBag.RoleList = RolesList;
+
+            return View();
+        }
+
+        [HttpPost]
+        public JsonResult LoadPermissions(string RoleID)
+        {
+            List<UserPermissions> permissions = new UsersDAL().GetUserPermissions(Convert.ToInt32(RoleID));
+            var data = JsonConvert.SerializeObject(permissions);
+            return Json(data);
+        }
+
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
         }
 
-        public void SetSession(Users user)
+        public IActionResult Departments()
+        {
+            if (HttpContext.Session.GetString("Name") == null)
+            {
+                TempData["Session"] = "Your Session has expired. Please Login again";
+                return RedirectToAction("Logout", "Users");
+            }
+
+            List<Department> listDept = new UsersDAL().GetAllDepartments();
+            ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
+
+            return View(listDept);
+        }
+
+        public IActionResult Designations()
+        {
+            if (HttpContext.Session.GetString("Name") == null)
+            {
+                TempData["Session"] = "Your Session has expired. Please Login again";
+                return RedirectToAction("Logout", "Users");
+            }
+
+            List<Designation> listDesig = new UsersDAL().GetAllDesignations();
+            ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
+
+            return View(listDesig);
+        }
+
+
+        #region Session Methods
+
+        public void SetSession(Users user, List<UserPermissions> permissions)
         {
             HttpContext.Session.SetString("ID", user.ID.ToString());
             HttpContext.Session.SetString("Email", user.Email.ToString());
@@ -215,7 +284,10 @@ namespace FCMS_RUDA.Controllers
             HttpContext.Session.SetString("UserRole", user.UserRole.ToString());
             HttpContext.Session.SetString("Name", user.Name.ToString());
             HttpContext.Session.SetString("Designation", user.Designation.ToString());
+            HttpContext.Session.SetString("DesignationName", user.DesignationName.ToString());
             HttpContext.Session.SetString("Department", user.Department.ToString());
+            HttpContext.Session.SetString("DepartmentName", user.DepartmentName.ToString());
+            HttpContext.Session.SetComplexData("Permissions", permissions);
         }
 
         public Users GetSession()
@@ -228,10 +300,20 @@ namespace FCMS_RUDA.Controllers
             user.UserStatus = Convert.ToInt32(HttpContext.Session.GetString("UserStatus"));
             user.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
             user.Name = HttpContext.Session.GetString("Name").ToString();
-            user.Designation = HttpContext.Session.GetString("Designation").ToString();
+            user.Designation = Convert.ToInt32(HttpContext.Session.GetString("Designation"));
+            user.DesignationName = HttpContext.Session.GetString("DesignationName").ToString();
             user.Department = Convert.ToInt32(HttpContext.Session.GetString("Department"));
+            user.DepartmentName = HttpContext.Session.GetString("DepartmentName").ToString();
 
             return user;
         }
+
+        public List<UserPermissions> GetSessionPermissions()
+        {
+            List<UserPermissions> permissions = HttpContext.Session.GetComplexData<List<UserPermissions>>("Permissions");
+            return permissions;
+        }
+
+        #endregion
     }
 }

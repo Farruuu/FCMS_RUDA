@@ -1,7 +1,7 @@
 ﻿@model BLL.DocumentType
 
 @{
-    ViewData["Title"] = "Add Document Type";
+    ViewData["Title"] = "Add File Type";
 }
 
 
@@ -25,13 +25,16 @@
                             </div>
                         </div>
                     </div>
+                    <br />
+                    <br />
                     <div class="row">
                         <div class="col-md-6">
-                            <a asp-action="DocumentTypes">Back to List</a>
+                            @*<a asp-action="DocumentTypes">Back to List</a>*@
+                            <a href='javascript:history.go(-1)'>Back</a>
                         </div>
                         <div class="col-md-6 text-end">
                             <div class="form-group">
-                                <input type="submit" value="Create" class="btn btn-outline-primary btn-lg" />
+                                <input type="submit" value="Save" class="btn btn-outline-primary btn-lg" />
                             </div>
                         </div>
                     </div>

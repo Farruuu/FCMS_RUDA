@@ -1,6 +1,13 @@
-﻿@model List<BLL.Users>
+﻿@using Microsoft.AspNetCore.Http;
+@using FCMS_RUDA.Models;
+@using BLL;
+
+@inject IHttpContextAccessor HttpContextAccessor
+@model List<BLL.Users>
+
 @{
     ViewData["Title"] = "Users List";
+    List<UserPermissions> permissions = HttpContextAccessor.HttpContext.Session.GetComplexData<List<UserPermissions>>("Permissions");
 }
 
 <div class="col-12">
@@ -11,7 +18,7 @@
                     @*<h4 class="mb-0">Users List</h4>*@
                 </div>
                 <div class="col-6 text-end">
-                    @if (ViewBag.UserRole < 3)
+                    @if (permissions.Any(x => x.ScreenID == 3) && permissions.Any(x => x.PAdd == true))
                     {
                         <a class="btn bg-gradient-dark mb-0" href="@Url.Action("AddNewUser", "Users")"><i class="fas fa-plus"></i>&nbsp;&nbsp;Add New User</a>
                     }
@@ -19,16 +26,16 @@
             </div>
         </div>
         <br />
-        <div class="card-body px-0 pt-0 pb-2">
+        <div class="card-body pl-2 pt-0 pb-2">
             <div class="table-responsive p-0">
-                <table class="table align-items-center mb-0">
+                <table class="table align-items-center mb-0" id="dataTable">
                     <thead>
                         <tr>
                             <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">User</th>
                             <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">Function</th>
                             <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">Role</th>
                             <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">Status</th>
-                            @if (ViewBag.UserRole < 3)
+                            @if (permissions.Any(x => x.ScreenID == 3 && x.PUpdate == true))
                             {
                                 <th class="text-uppercase text-secondary text-sm text-center font-weight-bolder opacity-7">Action</th>
                             }
@@ -49,7 +56,7 @@
                                 <td>
                                     <div class="d-flex px-2 py-1">
                                         <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-xs">@item.Designation</h6>
+                                            <h6 class="mb-0 text-xs">@item.DesignationName</h6>
                                             <p class="text-xs text-secondary mb-0">@item.DepartmentName</p>
                                         </div>
                                     </div>
@@ -67,7 +74,7 @@
                                         <span class="badge badge-sm bg-gradient-secondary">InActive</span>
                                     }
                                 </td>
-                                @if (ViewBag.UserRole < 3)
+                                @if (permissions.Any(x => x.ScreenID == 3 && x.PUpdate == true))
                                 {
                                     <td class="text-center">
                                         <a href="@Url.Action("UpdateUser", "Users", new  { UserID = item.ID})" class="text-secondary font-weight-bold text-xs">
@@ -83,8 +90,17 @@
         </div>
     </div>
 </div>
+
+<link href="~/Theme/assets/css/jquery.dataTables.min.css" rel="stylesheet" />
+<script src="~/Theme/assets/js/jquery-3.3.1.slim.min.js"></script>
+<script src="~/Theme/assets/js/jquery.dataTables.min.js" defer></script>
+
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#dataTable').DataTable();
+    });
 
     window.onload = function () {
 
@@ -94,5 +110,3 @@
         }
     };
 </script>
-
-

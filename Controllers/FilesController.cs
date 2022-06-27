@@ -3,6 +3,7 @@ using DAL;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Renci.SshNet;
 using System;
@@ -17,6 +18,7 @@ namespace FCMS_RUDA.Controllers
     public class FilesController : Controller
     {
         private readonly ILogger<FilesController> _logger;
+
         public FilesController(ILogger<FilesController> logger)
         {
             _logger = logger;
@@ -34,6 +36,205 @@ namespace FCMS_RUDA.Controllers
             ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
 
             return View(FilesList);
+        }
+
+        public IActionResult AddNewFile()
+        {
+            if (HttpContext.Session.GetString("Name") == null)
+            {
+                TempData["Session"] = "Your Session has expired. Please Login again";
+                return RedirectToAction("Logout", "Users");
+            }
+
+            List<Department> listDept = new UsersDAL().GetAllDepartments();
+            ViewBag.ListDept = listDept;
+
+            List<DocumentType> listtypes = new FilesDAL().GetAllDocumentTypes();
+            ViewBag.ListTypes = listtypes;
+
+            List<DocumentStatus> listStatus = new FilesDAL().GetAllDocumentStatus();
+            ViewBag.ListStatus = listStatus;
+
+            List<CommentCode> listCode = new FilesDAL().GetAllCommentCodes();
+            ViewBag.ListCode = listCode;
+
+            ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
+
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult AddNewFile(IFormFile Upload, DocumentViewModel viewModel, string Orgby, string Route, string Frwdto)
+        {
+            List<Department> listDept = new UsersDAL().GetAllDepartments();
+            ViewBag.ListDept = listDept;
+
+            List<DocumentType> listtypes = new FilesDAL().GetAllDocumentTypes();
+            ViewBag.ListTypes = listtypes;
+
+            List<DocumentStatus> listStatus = new FilesDAL().GetAllDocumentStatus();
+            ViewBag.ListStatus = listStatus;
+
+            List<CommentCode> listCode = new FilesDAL().GetAllCommentCodes();
+            ViewBag.ListCode = listCode;
+
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View();
+                }
+
+                int maxnumber = new FilesDAL().GetMaxDocNumber(viewModel.Document.DocumentRoute != 3 ? viewModel.Document.OriginatedBy : viewModel.DocDetails.ForwardedTo, viewModel.Document.DocumentRoute);
+                viewModel.Document.DocumentNumber = "RUDA-" + (viewModel.Document.DocumentRoute != 3 ? Orgby : Frwdto) + "-RR&DS-" + Route + "-" + maxnumber;
+
+                if (viewModel != null && Upload.Length > 0)
+                {
+                    viewModel.DocDetails.AttachmentName = viewModel.Document.DocumentNumber + "_" + viewModel.DocDetails.RotationNo + Path.GetExtension(Upload.FileName);
+                    viewModel.DocDetails.AttachmentPath = UploadFile(Upload, viewModel.Document.DocumentNumber, viewModel.DocDetails.AttachmentName);
+                }
+
+                if (viewModel.DocDetails.AttachmentPath == null)
+                {
+                    ViewBag.Message = "Error Uploading File to server. Please Try Again!";
+                    return View();
+                }
+
+                int UserID = Convert.ToInt32(HttpContext.Session.GetString("ID"));
+                Int64 result = new FilesDAL().CreateDocument(viewModel, UserID);
+
+                if (result > 0)
+                {
+                    TempData["Success"] = "Document Added successfully!";
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    ViewBag.Message = "Error Occured while saving Record. Please Try Again!";
+                    return View();
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Message = "Error Occured while saving Record. Please Try Again!";
+                _logger.LogError(ex.Message);
+                return View();
+            }
+        }
+
+        public IActionResult ViewFile(int FileID)
+        {
+            if (HttpContext.Session.GetString("Name") == null)
+            {
+                TempData["Session"] = "Your Session has expired. Please Login again";
+                return RedirectToAction("Logout", "Users");
+            }
+
+            DocumentViewModel ObjFile = new DocumentViewModel();
+
+            ObjFile.Document = new FilesDAL().GetDocumentByID(FileID);
+
+            List<Department> listDept = new UsersDAL().GetAllDepartments();
+            ViewBag.ListDept = listDept;
+
+            List<DocumentType> listtypes = new FilesDAL().GetAllDocumentTypes();
+            ViewBag.ListTypes = listtypes;
+
+            List<DocumentStatus> listStatus = new FilesDAL().GetAllDocumentStatus();
+            ViewBag.ListStatus = listStatus;
+
+            List<CommentCode> listCode = new FilesDAL().GetAllCommentCodes();
+            ViewBag.ListCode = listCode;
+
+            ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
+
+            return View(ObjFile);
+        }
+        public IActionResult UpdateFile(int FileID)
+        {
+            if (HttpContext.Session.GetString("Name") == null)
+            {
+                TempData["Session"] = "Your Session has expired. Please Login again";
+                return RedirectToAction("Logout", "Users");
+            }
+
+            DocumentViewModel ObjFile = new DocumentViewModel();
+
+            ObjFile.Document = new FilesDAL().GetDocumentByID(FileID);
+
+            List<Department> listDept = new UsersDAL().GetAllDepartments();
+            ViewBag.ListDept = listDept;
+
+            List<DocumentType> listtypes = new FilesDAL().GetAllDocumentTypes();
+            ViewBag.ListTypes = listtypes;
+
+            List<DocumentStatus> listStatus = new FilesDAL().GetAllDocumentStatus();
+            ViewBag.ListStatus = listStatus;
+
+            List<CommentCode> listCode = new FilesDAL().GetAllCommentCodes();
+            ViewBag.ListCode = listCode;
+
+            ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
+
+            return View(ObjFile);
+        }
+
+        [HttpPost]
+        public IActionResult UpdateFile(IFormFile Upload, DocumentViewModel viewModel)
+        {
+            List<Department> listDept = new UsersDAL().GetAllDepartments();
+            ViewBag.ListDept = listDept;
+
+            List<DocumentType> listtypes = new FilesDAL().GetAllDocumentTypes();
+            ViewBag.ListTypes = listtypes;
+
+            List<DocumentStatus> listStatus = new FilesDAL().GetAllDocumentStatus();
+            ViewBag.ListStatus = listStatus;
+
+            List<CommentCode> listCode = new FilesDAL().GetAllCommentCodes();
+            ViewBag.ListCode = listCode;
+
+            ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
+
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View();
+                }
+
+                if (viewModel != null && Upload.Length > 0)
+                {
+                    viewModel.DocDetails.AttachmentName = viewModel.Document.DocumentNumber + "_" + viewModel.DocDetails.RotationNo + Path.GetExtension(Upload.FileName);
+                    viewModel.DocDetails.AttachmentPath = UploadFile(Upload, viewModel.Document.DocumentNumber, viewModel.DocDetails.AttachmentName);
+                }
+
+                if (viewModel.DocDetails.AttachmentPath == null)
+                {
+                    ViewBag.Message = "Error Uploading File to server. Please Try Again!";
+                    return View();
+                }
+
+                int UserID = Convert.ToInt32(HttpContext.Session.GetString("ID"));
+                Int64 result = new FilesDAL().UpdateDocument(viewModel, UserID);
+
+                if (result > 0)
+                {
+                    TempData["Success"] = "Document Updated successfully!";
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    ViewBag.Message = "Error Occured while saving Record. Please Try Again!";
+                    return View();
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Message = "Error Occured while saving Record. Please Try Again!";
+                _logger.LogError(ex.Message);
+                return View();
+            }
         }
 
         public IActionResult DocumentTypes()
@@ -57,8 +258,6 @@ namespace FCMS_RUDA.Controllers
                 return RedirectToAction("Logout", "Users");
             }
 
-            ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
-
             return View();
         }
 
@@ -79,8 +278,9 @@ namespace FCMS_RUDA.Controllers
 
                 if (result > 0)
                 {
-                    TempData["Success"] = "Document Type Added successfully!";
+                    TempData["Success"] = "File Type Added successfully!";
                     return RedirectToAction("DocumentTypes");
+                    //return Redirect(Request.Headers["Referer"].ToString());
                 }
                 else
                 {
@@ -144,213 +344,31 @@ namespace FCMS_RUDA.Controllers
             }
         }
 
-        public IActionResult Departments()
-        {
-            if (HttpContext.Session.GetString("Name") == null)
-            {
-                TempData["Session"] = "Your Session has expired. Please Login again";
-                return RedirectToAction("Logout", "Users");
-            }
-
-            List<Departments> listDept = new UsersDAL().GetAllDepartments();
-            ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
-
-            return View(listDept);
-        }
-
-        public IActionResult AddNewFile()
-        {
-            if (HttpContext.Session.GetString("Name") == null)
-            {
-                TempData["Session"] = "Your Session has expired. Please Login again";
-                return RedirectToAction("Logout", "Users");
-            }
-
-            List<Departments> listDept = new UsersDAL().GetAllDepartments();
-            ViewBag.ListDept = listDept;
-
-            List<DocumentType> listtypes = new FilesDAL().GetAllDocumentTypes();
-            ViewBag.ListTypes = listtypes;
-
-            List<DocumentStatus> listStatus = new FilesDAL().GetAllDocumentStatus();
-            ViewBag.ListStatus = listStatus;
-
-            List<CommentCode> listCode = new FilesDAL().GetAllCommentCodes();
-            ViewBag.ListCode = listCode;
-
-            ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
-
-            return View();
-        }
-
-        [HttpPost]
-        public IActionResult AddNewFile(IFormFile Upload, DocumentViewModel viewModel, string Orgby, string Route, string Frwdto)
-        {
-            List<Departments> listDept = new UsersDAL().GetAllDepartments();
-            ViewBag.ListDept = listDept;
-
-            List<DocumentType> listtypes = new FilesDAL().GetAllDocumentTypes();
-            ViewBag.ListTypes = listtypes;
-
-            List<DocumentStatus> listStatus = new FilesDAL().GetAllDocumentStatus();
-            ViewBag.ListStatus = listStatus;
-
-            List<CommentCode> listCode = new FilesDAL().GetAllCommentCodes();
-            ViewBag.ListCode = listCode;
-
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return View();
-                }
-
-                int maxnumber = new FilesDAL().GetMaxDocNumber(viewModel.Document.DocumentRoute != 3 ? viewModel.Document.OriginatedBy : viewModel.DocDetails.ForwardedTo, viewModel.Document.DocumentRoute);
-                viewModel.Document.DocumentNumber = "RUDA-" + (viewModel.Document.DocumentRoute != 3 ? Orgby : Frwdto) + "-RR&DS-" + Route + "-" + maxnumber;
-
-                if (viewModel != null && Upload.Length > 0)
-                {
-                    viewModel.DocDetails.AttachmentName = viewModel.Document.DocumentNumber + "_" + viewModel.DocDetails.RotationNo + Path.GetExtension(Upload.FileName);
-                    viewModel.DocDetails.AttachmentPath = UploadFile(Upload, viewModel.Document.DocumentNumber, viewModel.DocDetails.AttachmentName);
-                }
-
-                if (viewModel.DocDetails.AttachmentPath == null)
-                {
-                    ViewBag.Message = "Error Uploading File to server. Please Try Again!";
-                    return View();
-                }
-
-                int UserID = Convert.ToInt32(HttpContext.Session.GetString("ID"));
-                Int64 result = new FilesDAL().CreateDocument(viewModel, UserID);
-
-                if (result > 0)
-                {
-                    TempData["Success"] = "Document Added successfully!";
-                    return RedirectToAction("Index");
-                }
-                else
-                {
-                    ViewBag.Message = "Error Occured while saving Record. Please Try Again!";
-                    return View();
-                }
-            }
-            catch (Exception ex)
-            {
-                ViewBag.Message = "Error Occured while saving Record. Please Try Again!";
-                _logger.LogError(ex.Message);
-                return View();
-            }
-        }
-
-        public IActionResult UpdateFile(int FileID)
-        {
-            if (HttpContext.Session.GetString("Name") == null)
-            {
-                TempData["Session"] = "Your Session has expired. Please Login again";
-                return RedirectToAction("Logout", "Users");
-            }
-
-            DocumentViewModel ObjFile = new DocumentViewModel();
-
-            ObjFile.Document = new FilesDAL().GetDocumentByID(FileID);
-
-            List<Departments> listDept = new UsersDAL().GetAllDepartments();
-            ViewBag.ListDept = listDept;
-
-            List<DocumentType> listtypes = new FilesDAL().GetAllDocumentTypes();
-            ViewBag.ListTypes = listtypes;
-
-            List<DocumentStatus> listStatus = new FilesDAL().GetAllDocumentStatus();
-            ViewBag.ListStatus = listStatus;
-
-            List<CommentCode> listCode = new FilesDAL().GetAllCommentCodes();
-            ViewBag.ListCode = listCode;
-
-            ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
-
-            return View(ObjFile);
-        }
-
-        [HttpPost]
-        public IActionResult UpdateFile(IFormFile Upload, DocumentViewModel viewModel)
-        {
-            List<Departments> listDept = new UsersDAL().GetAllDepartments();
-            ViewBag.ListDept = listDept;
-
-            List<DocumentType> listtypes = new FilesDAL().GetAllDocumentTypes();
-            ViewBag.ListTypes = listtypes;
-
-            List<DocumentStatus> listStatus = new FilesDAL().GetAllDocumentStatus();
-            ViewBag.ListStatus = listStatus;
-
-            List<CommentCode> listCode = new FilesDAL().GetAllCommentCodes();
-            ViewBag.ListCode = listCode;
-
-            ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
-
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return View();
-                }
-
-                if (viewModel != null && Upload.Length > 0)
-                {
-                    viewModel.DocDetails.AttachmentName = viewModel.Document.DocumentNumber + "_" + viewModel.DocDetails.RotationNo + Path.GetExtension(Upload.FileName);
-                    viewModel.DocDetails.AttachmentPath = UploadFile(Upload, viewModel.Document.DocumentNumber, viewModel.DocDetails.AttachmentName);
-                }
-
-                if (viewModel.DocDetails.AttachmentPath == null)
-                {
-                    ViewBag.Message = "Error Uploading File to server. Please Try Again!";
-                    return View();
-                }
-
-                int UserID = Convert.ToInt32(HttpContext.Session.GetString("ID"));
-                Int64 result = new FilesDAL().UpdateDocument(viewModel, UserID);
-
-                if (result > 0)
-                {
-                    TempData["Success"] = "Document Updated successfully!";
-                    return RedirectToAction("Index");
-                }
-                else
-                {
-                    ViewBag.Message = "Error Occured while saving Record. Please Try Again!";
-                    return View();
-                }
-            }
-            catch (Exception ex)
-            {
-                ViewBag.Message = "Error Occured while saving Record. Please Try Again!";
-                _logger.LogError(ex.Message);
-                return View();
-            }
-        }
 
 
         #region SFTP Functions
 
         public string UploadFile(IFormFile Attachment, string DocNumber, string attachmentName)
         {
-            var config = new SftpConfig
-            {
-                Host = "172.16.0.6",
-                Port = 22,
-                UserName = "Farrukh",
-                Password = "Hello@321",
-                BaseDirectory = "//RUDA-Downloads//DocumentControlSystem"
-            }; // can be retrieved from appsettings.json
+            var config = new ConfigurationBuilder().AddJsonFile("appsettings.Development.json").Build();
 
-            using var client = new SftpClient(config.Host, config.Port, config.UserName, config.Password);
+            SftpConfig ftp = new SftpConfig
+            {
+                Host = config["SftpSetting:Host"],
+                Port = Convert.ToInt32(config["SftpSetting:Port"]),
+                UserName = config["SftpSetting:UserName"],
+                Password = config["SftpSetting:Password"],
+                BaseDirectory = config["SftpSetting:BaseDirectory"],
+            };
+
+            using var client = new SftpClient(ftp.Host, ftp.Port, ftp.UserName, ftp.Password);
 
             try
             {
                 client.Connect();
-                client.ChangeDirectory(config.BaseDirectory);
+                client.ChangeDirectory(ftp.BaseDirectory);
 
-                string FolderPath = config.BaseDirectory + "//" + DocNumber;
+                string FolderPath = ftp.BaseDirectory + "//" + DocNumber;
                 string AttachmentPath = FolderPath + "//" + attachmentName;
 
                 if (!client.Exists(FolderPath))
@@ -361,51 +379,37 @@ namespace FCMS_RUDA.Controllers
                     client.UploadFile(filestream, AttachmentPath);
                 }
 
-                return "//" + config.Host + AttachmentPath;
+                return "//" + ftp.Host + AttachmentPath;
             }
-            catch (Exception ex)
-            {
-                return null;
-            }
-            finally
-            {
-                client.Disconnect();
-            }
+            catch (Exception) { return null; }
+            finally { client.Disconnect(); }
         }
 
-        public JsonResult DownloadFile(string DocumentNo, string remoteFilename)
+        public IActionResult DownloadFile(string DocumentNo, string remoteFilename)
         {
-            var config = new SftpConfig
-            {
-                Host = "172.16.0.6",
-                Port = 22,
-                UserName = "Farrukh",
-                Password = "Hello@321",
-                BaseDirectory = "//RUDA-Downloads//DocumentControlSystem"
-            }; // can be retrieved from appsettings.json
+            var config = new ConfigurationBuilder().AddJsonFile("appsettings.Development.json").Build();
 
-            using (SftpClient client = new SftpClient(config.Host, config.Port == 0 ? 22 : config.Port, config.UserName, config.Password))
+            SftpConfig ftp = new SftpConfig
+            {
+                Host = config["SftpSetting:Host"],
+                Port = Convert.ToInt32(config["SftpSetting:Port"]),
+                UserName = config["SftpSetting:UserName"],
+                Password = config["SftpSetting:Password"],
+                BaseDirectory = config["SftpSetting:BaseDirectory"],
+            };
+
+            using (SftpClient client = new SftpClient(ftp.Host, ftp.Port == 0 ? 22 : ftp.Port, ftp.UserName, ftp.Password))
             {
                 string desktoppath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                 try
                 {
                     client.Connect();
-                    string localFilePath = desktoppath + "\\" + remoteFilename;
-                    string RemoteFilePath = config.BaseDirectory + "//" + DocumentNo + "//" + remoteFilename;
 
-                    using (Stream stream = System.IO.File.Create(localFilePath))
-                    {
-                        client.DownloadFile(RemoteFilePath, stream);
-                    }
-                    client.Disconnect();
-
-                    return Json("File Downloaded Successfully to Desktop");
+                    string RemoteFilePath = ftp.BaseDirectory + "//" + DocumentNo + "//" + remoteFilename;
+                    byte[] fileBytes = client.ReadAllBytes(RemoteFilePath);
+                    return File(fileBytes, "application/force-download", remoteFilename);
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Failed in downloading file");
-                    return Json("Error Downloading file." + ex.Message + "\n" + desktoppath + " Please Try again!");
-                }
+                catch (Exception ex) { return Json("Error Downloading file." + ex.Message + "\n" + desktoppath + " Please Try again!"); }
                 finally { client.Disconnect(); }
             }
         }

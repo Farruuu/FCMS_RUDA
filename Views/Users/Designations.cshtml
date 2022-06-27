@@ -1,0 +1,84 @@
+﻿@using Microsoft.AspNetCore.Http;
+@using FCMS_RUDA.Models;
+@using BLL;
+
+@inject IHttpContextAccessor HttpContextAccessor
+@model List<BLL.Designation>
+
+@{
+    ViewData["Title"] = "Designations List";
+    List<UserPermissions> permissions = HttpContextAccessor.HttpContext.Session.GetComplexData<List<UserPermissions>>("Permissions");
+}
+
+<div class="col-12">
+    <div class="card mb-4">
+        <div class="card-header pb-0">
+            <div class="row">
+                <div class="col-6 d-flex align-items-center">
+                    @*<h4 class="mb-0">Users List</h4>*@
+                </div>
+                <div class="col-6 text-end">
+                    @if (permissions.Any(x => x.ScreenID == 10) && permissions.Any(x => x.PAdd == true))
+                    {
+                        <a class="btn bg-gradient-dark mb-0" href="@Url.Action("AddDesignation", "Users")"><i class="fas fa-plus"></i>&nbsp;&nbsp;Add Designation</a>
+                    }
+                </div>
+            </div>
+        </div>
+        <br />
+        <div class="card-body pl-2 pt-0 pb-2">
+            <div class="table-responsive p-0">
+                <table class="table align-items-center mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">ID</th>
+                            <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">Title</th>
+                            <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">Description(if Any)</th>
+                            @if (permissions.Any(x => x.ScreenID == 10 && x.PUpdate == true))
+                            {
+                                <th class="text-uppercase text-secondary text-sm text-center font-weight-bolder opacity-7">Action</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <p class="text-sm font-weight-bold mb-0">@item.ID</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-weight-bold mb-0">@item.Title</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-weight-bold mb-0">@item.Description</p>
+                                </td>
+                                @if (permissions.Any(x => x.ScreenID == 10 && x.PUpdate == true))
+                                {
+                                    <td class="text-center">
+                                        <a href="@Url.Action("UpdateDesignation", "Users", new  { DesigID = item.ID})" class="text-secondary font-weight-bold text-xs">
+                                            <i class="fas fa-pencil-alt ms-auto text-dark cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="" aria-hidden="true" data-bs-original-title="Update" aria-label="Update"></i>
+                                        </a>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+    window.onload = function () {
+
+        @if (TempData["Success"] != null)
+        {
+            @:alert("@TempData["Success"]");
+        }
+    };
+</script>
+
+

@@ -1,29 +1,31 @@
-﻿@using Microsoft.AspNetCore.Http;
+﻿@using System.Data
+@using Microsoft.AspNetCore.Http;
 @using FCMS_RUDA.Models;
 @using BLL;
 
 @inject IHttpContextAccessor HttpContextAccessor
-@model List<BLL.Documents>
+
+@model DataTable
 
 @{
-    ViewData["Title"] = "Documents List";
+    ViewData["Title"] = "File Requests";
     List<UserPermissions> permissions = HttpContextAccessor.HttpContext.Session.GetComplexData<List<UserPermissions>>("Permissions");
 }
 
 <div class="col-12">
     <div class="card mb-4">
         <div class="card-header pb-0">
-            <div class="row">
-                <div class="col-6 d-flex align-items-center">
-                    @*<h4 class="mb-0">Documents List</h4>*@
-                </div>
+            <!--<div class="row">
+                <div class="col-6 d-flex align-items-center">-->
+            @*<h4 class="mb-0">Documents List</h4>*@
+            <!--</div>
                 @if (permissions.Any(x => x.ScreenID == 7 && x.PAdd == true))
                 {
                     <div class="col-6 text-end">
-                        <a class="btn bg-gradient-dark mb-0" href="@Url.Action("AddNewFile", "Files")"><i class="fas fa-plus"></i>&nbsp;&nbsp;New Document</a>
+                        <a class="btn bg-gradient-dark mb-0" href="@Url.Action("AddNewFile", "EFile")"><i class="fas fa-plus"></i>&nbsp;&nbsp;New Document</a>
                     </div>
                 }
-            </div>
+            </div>-->
         </div>
         <br />
         <div class="card-body px-4 pt-0 pb-2">
@@ -31,44 +33,44 @@
                 <table class="table align-items-center mb-0" id="dataTable">
                     <thead>
                         <tr>
-                            <th class="text-uppercase text-primary text-xs text-center font-weight-bold opacity-7">Document Number</th>
-                            <th class="text-uppercase text-primary text-xs text-center font-weight-bold opacity-7">Document Type</th>
-                            <th class="text-uppercase text-primary text-xs text-center font-weight-bold opacity-7">Originated By</th>
-                            @*<th class="text-uppercase text-primary text-xs text-center font-weight-bold opacity-7">Receiving Date</th>*@
-                            <th class="text-uppercase text-primary text-xs text-center font-weight-bold opacity-7">Document Status</th>
+                            <th class="text-uppercase text-primary text-xs text-center font-weight-bold opacity-7">File Number</th>
+                            <th class="text-uppercase text-primary text-xs text-center font-weight-bold opacity-7">File Type</th>
+                            <th class="text-uppercase text-primary text-xs text-center font-weight-bold opacity-7">Subject</th>
+                            <th class="text-uppercase text-primary text-xs text-center font-weight-bold opacity-7">Initiated By</th>
+                            <th class="text-uppercase text-primary text-xs text-center font-weight-bold opacity-7">Marked By</th>
                             <th class="text-uppercase text-primary text-xs text-center font-weight-bold opacity-7">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model)
+                        @foreach (DataRow row in Model.Rows)
                         {
                             <tr>
                                 <td>
-                                    <p class="text-xs text-center font-weight-bold mb-0">@item.DocumentNumber</p>
+                                    <p class="text-xs text-center font-weight-bold mb-0">@row["FileNumber"]</p>
                                 </td>
                                 <td>
-                                    <p class="text-xs text-center font-weight-bold mb-0">@item.DocTypeName</p>
+                                    <p class="text-xs text-center font-weight-bold mb-0">@row["FileType"]</p>
                                 </td>
                                 <td>
-                                    <p class="text-xs text-center font-weight-bold mb-0">@item.OriginatedByName</p>
+                                    <p class="text-xs text-center font-weight-bold mb-0">@row["Subject"]</p>
                                 </td>
-                                @*<td>
-                                    <p class="text-xs text-center font-weight-bold mb-0">@item.ReceivingDate.ToShortDateString()</p>
-                                </td>*@
                                 <td>
-                                    <p class="text-xs text-center font-weight-bold mb-0">@item.DocStatusName</p>
+                                    <p class="text-xs text-center font-weight-bold mb-0">@row["InitiatedBy"]</p>
+                                </td>
+                                <td>
+                                    <p class="text-xs text-center font-weight-bold mb-0">@row["MarkedBy"]</p>
                                 </td>
                                 <td class="text-center">
                                     @if (permissions.Any(x => x.ScreenID == 6 && x.PView == true))
                                     {
-                                        <a href="@Url.Action("ViewFile", "Files", new { FileID = item.ID })" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="View Document Details">
+                                        <a href="@Url.Action("ViewFile", "EFile", new { FileID = row["ID"] })" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="View Document Details">
                                             View
                                         </a>
                                     }
-                                    &nbsp;&nbsp;
+                                    &nbsp;/&nbsp;
                                     @if (permissions.Any(x => x.ScreenID == 6 && x.PUpdate == true))
                                     {
-                                        <a href="@Url.Action("UpdateFile","Files", new { FileID = item.ID})" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit Document">
+                                        <a href="@Url.Action("UpdateFile","EFile", new { FileID = row["ID"]})" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit Document">
                                             Update
                                         </a>
                                     }
@@ -101,4 +103,3 @@
         }
     };
 </script>
-

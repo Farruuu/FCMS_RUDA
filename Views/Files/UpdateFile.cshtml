@@ -248,8 +248,8 @@
                     <table class="table align-items-center mb-0">
                         <thead>
                             <tr>
-                                <th class="text-sm text-primary opacity-7">Rotation No</th>
-                                <th class="text-sm text-primary opacity-7">Revision No</th>
+                                <th class="text-sm text-primary opacity-7">Rotation#</th>
+                                <th class="text-sm text-primary opacity-7">Revision#</th>
                                 <th class="text-sm text-primary opacity-7">Forwarded To</th>
                                 <th class="text-sm text-primary opacity-7">Forwarded Date</th>
                                 <th class="text-sm text-primary opacity-7">Returned Date</th>
@@ -290,9 +290,9 @@
                                     @if (ViewBag.UserRole < 3)
                                     {
                                         <td class="text-center">
-                                            <a onclick="DownloadFile('@Model.Document.DocumentNumber', '@item.AttachmentName');" class="text-xs font-weight-bold mb-0" data-toggle="tooltip" data-original-title="Download File">
-                                                <i class="fas fa-file-pdf text-lg me-1" aria-hidden="true"></i>   
-                                            Download
+                                            <a href="@Url.Action("DownloadFile","Files", new {DocumentNo = Model.Document.DocumentNumber, remoteFilename = item.AttachmentName })" class="text-xs font-weight-bold mb-0" data-toggle="tooltip" data-original-title="Download File">
+                                                <i class="fas fa-file-pdf text-lg me-1" aria-hidden="true"></i>
+                                                Download
                                             </a>
                                         </td>
                                     }
@@ -384,27 +384,6 @@
                 return false;
             }
         }
-    }
-
-    function DownloadFile(DocNo, FileName) {
-        $.ajax({
-            url: "@Url.Action("DownloadFile", "Files")",
-            type: "POST",
-            dataType: "json",
-            async: false,
-            cache: false,
-            data: { DocumentNo: DocNo, remoteFilename: FileName },
-            success: function (response) {
-                alert(response);
-            },
-            failure: function (response) {
-                alert(response.responseText);
-            },
-            error: function (response) {
-                alert(response.responseText);
-            }
-        });
-
     }
 
     @if (ViewBag.Message != null)

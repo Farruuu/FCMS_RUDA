@@ -1,0 +1,153 @@
+﻿@using Microsoft.AspNetCore.Http;
+@using FCMS_RUDA.Models;
+@using BLL;
+
+@inject IHttpContextAccessor HttpContextAccessor
+@model BLL.EFileViewModel
+
+@{
+    ViewData["Title"] = "New File";
+    List<UserPermissions> permissions = HttpContextAccessor.HttpContext.Session.GetComplexData<List<UserPermissions>>("Permissions");
+}
+
+<div class="col-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="d-flex align-items-center">
+                @*<p class="mb-0">Add New Document</p>*@
+            </div>
+        </div>
+        <div class="card-body">
+            <form asp-action="AddNewFile" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="row">
+                    <div class="form-group col-md-3">
+                        <label asp-for="File.FileDate" class="control-label required"></label>
+                        <input asp-for="File.FileDate" class="form-control" id="FileDate" readonly />
+                        <span asp-validation-for="File.FileDate" class="text-danger"></span>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label asp-for="File.FilePriority" class="control-label required"></label>
+                        <select asp-for="File.FilePriority" class="form-control">
+                            <option value="0">Select...</option>
+                            @foreach (var item in ViewBag.ListPriority)
+                            {
+                                <option value="@item.ID">@item.Description</option>
+                            }
+                        </select>
+                        <span asp-validation-for="File.FilePriority" class="text-danger"></span>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label asp-for="File.FileType" class="control-label required"></label>
+                        <select asp-for="File.FileType" class="form-control">
+                            <option value="0">Select...</option>
+                            @foreach (var item in ViewBag.ListTypes)
+                            {
+                                <option value="@item.ID">@item.Description</option>
+                            }
+                        </select>
+                        <span asp-validation-for="File.FileType" class="text-danger"></span>
+                    </div>
+                    <div class="form-group col-md-1">
+                        <a class="btn btn-xs bg-gradient-dark mb-0" style="margin-top:36px;" href="@Url.Action("AddNewDocType", "Files")"><i class="fas fa-plus"></i></a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-12">
+                        <label asp-for="File.Subject" class="control-label required"></label>
+                        <input asp-for="File.Subject" class="form-control" />
+                        <span asp-validation-for="File.Subject" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-12">
+                        <label asp-for="File.FileBody" class="control-label required"></label>
+                        <textarea asp-for="File.FileBody" class="form-control" rows="10" cols="50"></textarea>
+                        <span asp-validation-for="File.FileBody" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-4">
+                        <label asp-for="FileDetails.ForwardedTo" class="control-label required"></label>
+                        <select asp-for="FileDetails.ForwardedTo" class="form-control" id="ForwardedTo">
+                            <option value="0">Select...</option>
+                            @foreach (var item in ViewBag.ListUsers)
+                            {
+                                <option value="@item.ID">@item.Name - @item.DesignationName - @item.DepartmentName</option>
+                            }
+                        </select>
+                        <span asp-validation-for="FileDetails.ForwardedTo" class="text-danger"></span>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label asp-for="FileDetails.FileAttachment" class="control-label"></label>
+                        <input asp-for="FileDetails.FileAttachment" class="form-control" type="file" onchange="fileTypeValidation()" />
+                        @*<span asp-validation-for="Remarks" class="text-danger"></span>*@
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label asp-for="FileDetails.AttachmentName" class="control-label"></label>
+                        <input asp-for="FileDetails.AttachmentName" class="form-control" />
+                        <span asp-validation-for="FileDetails.AttachmentName" class="text-danger"></span>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-md-6">
+                        <a asp-action="Index">Back to List</a>
+                    </div>
+                    @if (permissions.Any(x => x.ScreenID == 7 && x.PAdd == true))
+                    {
+                        <div class="col-md-6 text-end">
+                            <div class="form-group">
+                                <input type="submit" value="Create" class="btn btn-outline-primary" />
+                            </div>
+                        </div>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var now = new Date();
+
+        var day = ("0" + now.getDate()).slice(-2);
+        var month = ("0" + (now.getMonth() + 1)).slice(-2);
+
+        var today = now.getFullYear() + "-" + (month) + "-" + (day);
+
+        $('#FileDate').val(today);
+    });
+
+    @if (ViewBag.Message != null)
+    {
+        @:window.onload = function () { alert("@ViewBag.Message"); };
+    }
+
+    function fileTypeValidation() {
+        debugger;
+        var _validFileExtensions = [".jpg", ".jpeg", ".png", ".xlsx", ".xlx", ".doc", ".docs", ".docx", ".pdf"];
+
+        var sFileName = $("#Upload").val();
+        if (sFileName.length > 0) {
+            var blnValid = false;
+            for (var j = 0; j < _validFileExtensions.length; j++) {
+                var sCurExtension = _validFileExtensions[j];
+                if (sFileName.substr(sFileName.length - sCurExtension.length, sCurExtension.length).toLowerCase() == sCurExtension.toLowerCase()) {
+                    blnValid = true;
+                    break;
+                }
+            }
+
+            if (!blnValid) {
+                alert("Sorry, " + sFileName + " is invalid, allowed extensions are: " + _validFileExtensions.join(", "));
+                $("#Upload").val("");
+                return false;
+            }
+        }
+    }
+
+</script>

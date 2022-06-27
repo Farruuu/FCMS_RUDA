@@ -1,5 +1,12 @@
 ﻿@using Microsoft.AspNetCore.Http;
+@using FCMS_RUDA.Models;
+@using BLL;
+
 @inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    List<UserPermissions> permissions = HttpContextAccessor.HttpContext.Session.GetComplexData<List<UserPermissions>>("Permissions");
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -9,7 +16,7 @@
     <link rel="icon" type="image/png" href="~/Theme/assets/img/favicon.png">
 
     <title>
-        Document Control System
+        E File System
     </title>
 
     <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
@@ -26,65 +33,103 @@
         <div class="sidenav-header">
             <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
             <img src="~/Theme/assets/img/logo2.png" class="navbar-brand-img h-200" alt="main_logo" />
-            <span class="ms-1 font-weight-bold">RR&DS - RUDA</span>
+            <span class="ms-1 font-weight-bold">E-File System</span>
         </div>
-        <hr class="horizontal dark mt-0">
+        @*<hr class="horizontal dark mt-0">*@
+        <hr />
         <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
-            <!-- #region Commented Old navbar -->
-            @*<ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="@Url.Action("Index","Home")">
-                            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-                                <i class="ni ni-paper-diploma text-primary text-sm opacity-10"></i>
-                            </div>
-                            <span class="nav-link-text ms-1">Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="nav-item sub-menu">
-                        <a class="nav-link" href="@Url.Action("Index","Users")">
-                            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-                                <i class="ni ni-single-02 text-primary text-sm opacity-10"></i>
-                            </div>
-                            <span class="nav-link-text ms-1">User Management</span>
-                        </a>
-                        <ul>
-                            <li>
-
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index","Files")">
-                            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-                                <i class="ni ni-credit-card text-primary text-sm opacity-10"></i>
-                            </div>
-                            <span class="nav-link-text ms-1">Document Management</span>
-                        </a>
-                    </li>
-                </ul>*@
-
-            <!-- #endregion -->
-
             <nav class='animated bounceInDown custom-nav'>
                 <ul>
-                    <li><a href="@Url.Action("Index","Home")">Dashboard</a></li>
-                    <li class='sub-menu'>
-                        <a href="#">User Management<div class='fa fa-caret-down right'></div></a>
-                        <ul>
-                            <li><a href="@Url.Action("Index","Users")">Users List</a></li>
-                            <li><a href="@Url.Action("AddNewUser","Users")">Add New User</a></li>
-                            <li><a href="@Url.Action("UserRoles","Users")">User Roles</a></li>
-                        </ul>
-                    </li>
-                    <li class='sub-menu'>
-                        <a href="#">Document Management<div class='fa fa-caret-down right'></div></a>
-                        <ul>
-                            <li><a href="@Url.Action("Index","Files")">Documents List</a></li>
-                            <li><a href="@Url.Action("AddNewFile","Files")">Add New Document</a></li>
-                            <li><a href="@Url.Action("DocumentTypes","Files")">Document Types</a></li>
-                            <li><a href="@Url.Action("Departments","Files")">Departments</a></li>
-                        </ul>
-                    </li>
+                    @if (permissions.Any(x => x.ModuleID == 1 && x.ScreenID == 1 && x.PView == true))
+                    {
+                        <li><a href="@Url.Action("Index", "Home")">Dashboard</a></li>
+                    }
+                    @if (permissions.Any(x => x.ModuleID == 2))
+                    {
+                        <li class='sub-menu'>
+                            <a href="#">User Management<div class='fa fa-caret-down right'></div></a>
+                            <ul>
+                                @if (permissions.Any(x => x.ScreenID == 3 && x.PView == true && x.PAdd == true))
+                                {
+                                    <li><a href="@Url.Action("AddNewUser", "Users")" class="text-sm text-sm-left">Add New User</a></li>
+                                }
+                                @if (permissions.Any(x => x.ScreenID == 2 && x.PView == true))
+                                {
+                                    <li><a href="@Url.Action("Index", "Users")" class="text-sm text-sm-left">Users List</a></li>
+                                }
+
+                                @if (permissions.Any(x => x.ScreenID == 4 && x.PView == true))
+                                {
+                                    <li><a href="@Url.Action("UserRoles", "Users")" class="text-sm text-sm-left">User Types</a></li>
+                                }
+                                @if (permissions.Any(x => x.ScreenID == 5 && x.PView == true))
+                                {
+                                    <li><a href="@Url.Action("UserPermissions", "Users")" class="text-sm text-sm-left">User Permissions</a></li>
+                                }
+                                @if (permissions.Any(x => x.ScreenID == 9 && x.PView == true))
+                                {
+                                    <li><a href="@Url.Action("Departments", "Users")" class="text-sm text-sm-left">Departments</a></li>
+                                }
+                                @if (permissions.Any(x => x.ScreenID == 9 && x.PView == true))
+                                {
+                                    <li><a href="@Url.Action("Designations", "Users")" class="text-sm text-sm-left">Designations</a></li>
+                                }
+                            </ul>
+                        </li>
+                    }
+                    @if (permissions.Any(x => x.ModuleID == 3))
+                    {
+                        <li class='sub-menu' hidden>
+                            <a href="#">Document Management<div class='fa fa-caret-down right'></div></a>
+                            <ul>
+                                @if (permissions.Any(x => x.ScreenID == 6 && x.PView == true))
+                                {
+                                    <li><a href="@Url.Action("Index", "Files")" class="text-sm text-sm-left">Documents List</a></li>
+                                }
+                                @if (permissions.Any(x => x.ScreenID == 7 && x.PView == true && x.PAdd == true))
+                                {
+                                    <li><a href="@Url.Action("AddNewFile", "Files")" class="text-sm text-sm-left">Create New Document</a></li>
+                                }
+                                @if (permissions.Any(x => x.ScreenID == 8 && x.PView == true))
+                                {
+                                    <li><a href="@Url.Action("DocumentTypes", "Files")" class="text-sm text-sm-left">Document Types</a></li>
+                                }
+                                @if (permissions.Any(x => x.ScreenID == 9 && x.PView == true))
+                                {
+                                    <li><a href="@Url.Action("Departments", "Files")" class="text-sm text-sm-left">Departments</a></li>
+                                }
+                            </ul>
+                        </li>
+                    }
+                    @if (permissions.Any(x => x.ModuleID == 3))
+                    {
+                        <li class='sub-menu'>
+                            <a href="#">E-Files<div class='fa fa-caret-down right'></div></a>
+                            <ul>
+                                @if (permissions.Any(x => x.ScreenID == 8 && x.PView == true))
+                                {
+                                    <li><a href="@Url.Action("FileRequests", "EFile")" class="text-sm text-sm-left">File Requests</a></li>
+                                }
+                                @if (permissions.Any(x => x.ScreenID == 7 && x.PView == true && x.PAdd == true))
+                                {
+                                    <li><a href="@Url.Action("AddNewFile", "EFile")" class="text-sm text-sm-left">Create New</a></li>
+                                }
+                                @if (permissions.Any(x => x.ScreenID == 6 && x.PView == true))
+                                {
+                                    <li><a href="@Url.Action("Index", "EFile")" class="text-sm text-sm-left">My Files</a></li>
+                                }
+                            </ul>
+                        </li>
+                    }
+                    @if (permissions.Any(x => x.ModuleID == 4))
+                    {
+                        <li class='sub-menu'>
+                            <a href="#">Reports<div class='fa fa-caret-down right'></div></a>
+                            <ul>
+                                <li><a href="#" class="text-sm text-sm-left">Documents</a></li>
+                            </ul>
+                        </li>
+                    }
                 </ul>
             </nav>
         </div>
@@ -107,8 +152,10 @@
                     <ul class="navbar-nav justify-content-end text-right">
                         <li class="nav-item d-flex align-items-center">
                             <a href="javascript:;" class="nav-link text-white font-weight-bold px-0">
-                                <i class="fa fa-user me-sm-1"></i>
-                                <span class="d-sm-inline d-none">@HttpContextAccessor.HttpContext.Session.GetString("Name").ToString()</span>
+                                <div class="flex-lg-grow-1">
+                                    <span class="fw-semibold d-block"><i class="fa fa-user me-sm-1"></i>@HttpContextAccessor.HttpContext.Session.GetString("Name").ToString()</span>
+                                    <small class="fw-semibold d-block">@HttpContextAccessor.HttpContext.Session.GetString("DesignationName").ToString()</small>
+                                </div>
                             </a>
                         </li>
                     </ul>
@@ -146,11 +193,12 @@
     <script src="~/Theme/assets/js/plugins/chartjs.min.js"></script>
     <script src="~/Theme/assets/js/argon-dashboard.min.js?v=2.0.0"></script>
     <script async defer src="https://buttons.github.io/buttons.js"></script>
-    <script>
-        $('.sub-menu ul').hide();
-        $(".sub-menu a").click(function () {
-            $(this).parent(".sub-menu").children("ul").slideToggle("100");
-            $(this).find(".right").toggleClass("fa-caret-up fa-caret-down");
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        jQuery('.sub-menu ul').hide();
+        jQuery(".sub-menu a").click(function () {
+            jQuery(this).parent(".sub-menu").children("ul").slideToggle("100");
+            jQuery(this).find(".right").toggleClass("fa-caret-up fa-caret-down");
         });
     </script>
 </body>

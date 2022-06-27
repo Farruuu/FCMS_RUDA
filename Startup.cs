@@ -28,7 +28,7 @@ namespace FCMS_RUDA
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            services.AddSession(option => { option.IdleTimeout = TimeSpan.FromMinutes(10); });
+            services.AddSession(option => { option.IdleTimeout = TimeSpan.FromMinutes(30); });
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddHttpContextAccessor();
         }
