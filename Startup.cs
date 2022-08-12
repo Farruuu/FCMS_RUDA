@@ -48,16 +48,8 @@ namespace FCMS_RUDA
             app.UseSession();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
-            //app.UseStaticFiles(new StaticFileOptions()
-            //{
-            //    FileProvider = new PhysicalFileProvider("C:\\DocumentControlSystem"),
-            //    RequestPath = "/DocumentControlSystem"
-            //});
-
             app.UseRouting();
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

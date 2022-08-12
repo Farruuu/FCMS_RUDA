@@ -92,3 +92,10 @@ body {
 a#dropdownMenuLink:after {
     display: none;
 }
+
+pre.preTag {
+    font-family: "Open Sans", sans-serif;
+    font-size: 1rem;
+    white-space: pre-line;
+    padding-top:7px;
+}

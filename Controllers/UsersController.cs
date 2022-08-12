@@ -1,14 +1,13 @@
-﻿using BLL;
+﻿using com.ruda.Efile.Domain;
 using DAL;
 using FCMS_RUDA.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FCMS_RUDA.Controllers
 {
@@ -20,6 +19,7 @@ namespace FCMS_RUDA.Controllers
         {
             _logger = logger;
         }
+
         public IActionResult Index()
         {
             try
@@ -74,7 +74,7 @@ namespace FCMS_RUDA.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Message = "Invalid email or password. Try again!";
+                ViewBag.Message = "Error Occured while Processing Your request.\n " + ex.Message + ".\n Try again!";
                 return View();
             }
         }
@@ -272,22 +272,36 @@ namespace FCMS_RUDA.Controllers
             return View(listDesig);
         }
 
+        [HttpPost]
+        public JsonResult LoadUsersForFileMarkByDept(string DeptID)
+        {
+            List<Users> listUsers = new UsersDAL().GetUsersForNewFileMark(Convert.ToInt32(DeptID), Convert.ToInt32(HttpContext.Session.GetString("ID")));
+            var data = JsonConvert.SerializeObject(listUsers);
+            return Json(data);
+        }
 
         #region Session Methods
 
         public void SetSession(Users user, List<UserPermissions> permissions)
         {
-            HttpContext.Session.SetString("ID", user.ID.ToString());
-            HttpContext.Session.SetString("Email", user.Email.ToString());
-            HttpContext.Session.SetString("password", user.Password.ToString());
-            HttpContext.Session.SetString("UserStatus", user.UserStatus.ToString());
-            HttpContext.Session.SetString("UserRole", user.UserRole.ToString());
-            HttpContext.Session.SetString("Name", user.Name.ToString());
-            HttpContext.Session.SetString("Designation", user.Designation.ToString());
-            HttpContext.Session.SetString("DesignationName", user.DesignationName.ToString());
-            HttpContext.Session.SetString("Department", user.Department.ToString());
-            HttpContext.Session.SetString("DepartmentName", user.DepartmentName.ToString());
-            HttpContext.Session.SetComplexData("Permissions", permissions);
+            try
+            {
+                HttpContext.Session.SetString("ID", user.ID.ToString());
+                HttpContext.Session.SetString("Email", user.Email.ToString());
+                HttpContext.Session.SetString("password", user.Password.ToString());
+                HttpContext.Session.SetString("UserStatus", user.UserStatus.ToString());
+                HttpContext.Session.SetString("UserRole", user.UserRole.ToString());
+                HttpContext.Session.SetString("Name", user.Name.ToString());
+                HttpContext.Session.SetString("Designation", user.Designation.ToString());
+                HttpContext.Session.SetString("DesignationName", user.DesignationName.ToString());
+                HttpContext.Session.SetString("Department", user.Department.ToString());
+                HttpContext.Session.SetString("DepartmentName", user.DepartmentName.Substring(0, user.DepartmentName.IndexOf("-")).ToString());
+                HttpContext.Session.SetString("DeptInitials", user.DepartmentName[(user.DepartmentName.IndexOf("-") + 1)..].ToString());
+                HttpContext.Session.SetString("WingName", user.WingName.Substring(0, user.WingName.IndexOf("-")).ToString());
+                HttpContext.Session.SetString("WingInitials", user.WingName[(user.WingName.IndexOf("-") + 1)..].ToString());
+                HttpContext.Session.SetComplexData("Permissions", permissions);
+            }
+            catch (Exception ex) { throw new Exception(ex.Message); }
         }
 
         public Users GetSession()
@@ -304,6 +318,8 @@ namespace FCMS_RUDA.Controllers
             user.DesignationName = HttpContext.Session.GetString("DesignationName").ToString();
             user.Department = Convert.ToInt32(HttpContext.Session.GetString("Department"));
             user.DepartmentName = HttpContext.Session.GetString("DepartmentName").ToString();
+            user.DeptInitials = HttpContext.Session.GetString("DeptInitials").ToString();
+            user.WingName = HttpContext.Session.GetString("WingName").ToString();
 
             return user;
         }

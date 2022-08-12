@@ -1,9 +1,9 @@
 ﻿@using Microsoft.AspNetCore.Http;
 @using FCMS_RUDA.Models;
-@using BLL;
+@using com.ruda.Efile.Domain;
 
 @inject IHttpContextAccessor HttpContextAccessor
-@model BLL.EFileViewModel
+@model com.ruda.Efile.Domain.EFileViewModel
 
 @{
     ViewData["Title"] = "New File";
@@ -26,7 +26,7 @@
                         <input asp-for="File.FileDate" class="form-control" id="FileDate" readonly />
                         <span asp-validation-for="File.FileDate" class="text-danger"></span>
                     </div>
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-3">
                         <label asp-for="File.FilePriority" class="control-label required"></label>
                         <select asp-for="File.FilePriority" class="form-control">
                             <option value="0">Select...</option>
@@ -37,7 +37,7 @@
                         </select>
                         <span asp-validation-for="File.FilePriority" class="text-danger"></span>
                     </div>
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-3">
                         <label asp-for="File.FileType" class="control-label required"></label>
                         <select asp-for="File.FileType" class="form-control">
                             <option value="0">Select...</option>
@@ -48,8 +48,16 @@
                         </select>
                         <span asp-validation-for="File.FileType" class="text-danger"></span>
                     </div>
-                    <div class="form-group col-md-1">
-                        <a class="btn btn-xs bg-gradient-dark mb-0" style="margin-top:36px;" href="@Url.Action("AddNewDocType", "Files")"><i class="fas fa-plus"></i></a>
+                    <div class="form-group col-md-3">
+                        <label asp-for="File.FileStatus" class="control-label required"></label>
+                        <select asp-for="File.FileStatus" class="form-control" id="FileStatus" disabled>
+                            <option value="0">Select...</option>
+                            @foreach (var item in ViewBag.ListStatus)
+                            {
+                                <option value="@item.ID">@item.Description</option>
+                            }
+                        </select>
+                        <span asp-validation-for="File.FileStatus" class="text-danger"></span>
                     </div>
                 </div>
                 <div class="row">
@@ -62,37 +70,48 @@
                 <div class="row">
                     <div class="form-group col-md-12">
                         <label asp-for="File.FileBody" class="control-label required"></label>
-                        <textarea asp-for="File.FileBody" class="form-control" rows="10" cols="50"></textarea>
+                        <textarea asp-for="File.FileBody" class="form-control" rows="6" cols="50"></textarea>
                         <span asp-validation-for="File.FileBody" class="text-danger"></span>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="form-group col-md-4">
-                        <label asp-for="FileDetails.ForwardedTo" class="control-label required"></label>
-                        <select asp-for="FileDetails.ForwardedTo" class="form-control" id="ForwardedTo">
+                    <div class="form-group col-md-3">
+                        <label asp-for="FileDetails.MarkedToDept" class="control-label required"></label>
+                        <select asp-for="FileDetails.MarkedToDept" class="form-control" id="ForwardedToDept" disabled>
+                            <option value="0">Select...</option>
+                            @foreach (var item in ViewBag.ListDepts)
+                            {
+                                <option value="@item.ID">@item.Name</option>
+                            }
+                        </select>
+                        <span asp-validation-for="FileDetails.MarkedToDept" class="text-danger"></span>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label asp-for="FileDetails.MarkedTo" class="control-label required"></label>
+                        <select asp-for="FileDetails.MarkedTo" class="form-control" id="ForwardedTo">
                             <option value="0">Select...</option>
                             @foreach (var item in ViewBag.ListUsers)
                             {
                                 <option value="@item.ID">@item.Name - @item.DesignationName - @item.DepartmentName</option>
                             }
                         </select>
-                        <span asp-validation-for="FileDetails.ForwardedTo" class="text-danger"></span>
+                        <span asp-validation-for="FileDetails.MarkedTo" class="text-danger"></span>
                     </div>
-                    <div class="form-group col-md-4">
-                        <label asp-for="FileDetails.FileAttachment" class="control-label"></label>
-                        <input asp-for="FileDetails.FileAttachment" class="form-control" type="file" onchange="fileTypeValidation()" />
+                    <div class="form-group col-md-3">
+                        <label asp-for="FileAttachments.FileAttachment" class="control-label"></label>
+                        <input asp-for="FileAttachments.FileAttachment" class="form-control" type="file" onchange="fileTypeValidation()" />
                         @*<span asp-validation-for="Remarks" class="text-danger"></span>*@
                     </div>
-                    <div class="form-group col-md-4">
-                        <label asp-for="FileDetails.AttachmentName" class="control-label"></label>
-                        <input asp-for="FileDetails.AttachmentName" class="form-control" />
-                        <span asp-validation-for="FileDetails.AttachmentName" class="text-danger"></span>
+                    <div class="form-group col-md-3">
+                        <label asp-for="FileAttachments.AttachmentName" class="control-label"></label>
+                        <input asp-for="FileAttachments.AttachmentName" class="form-control" />
+                        <span asp-validation-for="FileAttachments.AttachmentName" class="text-danger"></span>
                     </div>
                 </div>
                 <br />
                 <div class="row">
                     <div class="col-md-6">
-                        <a asp-action="Index">Back to List</a>
+                        <a href='javascript:history.go(-1)'>Back</a>
                     </div>
                     @if (permissions.Any(x => x.ScreenID == 7 && x.PAdd == true))
                     {
@@ -120,12 +139,18 @@
         var today = now.getFullYear() + "-" + (month) + "-" + (day);
 
         $('#FileDate').val(today);
+        $('#FileStatus').val(1);
+
+        $("#ForwardedToDept").val(@ViewBag.MarkedToDept);
+
     });
 
     @if (ViewBag.Message != null)
     {
         @:window.onload = function () { alert("@ViewBag.Message"); };
     }
+
+
 
     function fileTypeValidation() {
         debugger;

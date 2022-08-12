@@ -1,4 +1,4 @@
-﻿using BLL;
+﻿using com.ruda.Efile.Domain;
 using DAL;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,8 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FCMS_RUDA.Controllers
 {
@@ -50,7 +48,12 @@ namespace FCMS_RUDA.Controllers
                 return RedirectToAction("Logout", "Users");
             }
 
-            List<Users> listUsers = new UsersDAL().GetUsersForFileMark(Convert.ToInt32(HttpContext.Session.GetString("Department")), Convert.ToInt32(HttpContext.Session.GetString("ID")));
+            ViewBag.MarkedToDept = Convert.ToInt32(HttpContext.Session.GetString("Department"));
+
+            List<Department> lstdept = new UsersDAL().GetAllDepartments();
+            ViewBag.ListDepts = lstdept;
+
+            List<Users> listUsers = new UsersDAL().GetUsersForNewFileMark(Convert.ToInt32(HttpContext.Session.GetString("Department")), Convert.ToInt32(HttpContext.Session.GetString("ID")));
             ViewBag.ListUsers = listUsers;
 
             List<DocumentPriority> listPriority = new FilesDAL().GetAllDocumentPriorities();
@@ -58,6 +61,9 @@ namespace FCMS_RUDA.Controllers
 
             List<DocumentType> listtypes = new FilesDAL().GetAllDocumentTypes();
             ViewBag.ListTypes = listtypes;
+
+            List<DocumentStatus> listStatuses = new FilesDAL().GetAllDocumentStatus();
+            ViewBag.ListStatus = listStatuses;
 
             return View();
         }
@@ -65,7 +71,7 @@ namespace FCMS_RUDA.Controllers
         [HttpPost]
         public IActionResult AddNewFile(EFileViewModel viewModel)
         {
-            List<Users> listUsers = new UsersDAL().GetUsersForFileMark(Convert.ToInt32(HttpContext.Session.GetString("Department")), Convert.ToInt32(HttpContext.Session.GetString("ID")));
+            List<Users> listUsers = new UsersDAL().GetUsersForNewFileMark(Convert.ToInt32(HttpContext.Session.GetString("Department")), Convert.ToInt32(HttpContext.Session.GetString("ID")));
             ViewBag.ListUsers = listUsers;
 
             List<DocumentPriority> listPriority = new FilesDAL().GetAllDocumentPriorities();
@@ -73,6 +79,9 @@ namespace FCMS_RUDA.Controllers
 
             List<DocumentType> listtypes = new FilesDAL().GetAllDocumentTypes();
             ViewBag.ListTypes = listtypes;
+
+            List<DocumentStatus> listStatuses = new FilesDAL().GetAllDocumentStatus();
+            ViewBag.ListStatus = listStatuses;
 
             int UserID = Convert.ToInt32(HttpContext.Session.GetString("ID"));
             try
@@ -82,27 +91,25 @@ namespace FCMS_RUDA.Controllers
                     return View();
                 }
 
-                string deptname = HttpContext.Session.GetString("DepartmentName").ToString();
-                int index1 = HttpContext.Session.GetString("DepartmentName").ToString().IndexOf("-") + 1;
+                string WingInitials = HttpContext.Session.GetString("WingInitials").ToString();
+                string DeptInitials = HttpContext.Session.GetString("DeptInitials").ToString();
 
-                string DeptInitials = deptname[index1..];
+                int maxnumber = new EFileDAL().GetMaxDocNumber(Convert.ToInt32(HttpContext.Session.GetString("Department")));
+                viewModel.File.FileNumber = "RUDA-" + WingInitials + "-" + DeptInitials + "-" + DateTime.Now.Year + "-" + maxnumber;
 
-                int maxnumber = new FilesDAL().GetMaxDocNumber(Convert.ToInt32(HttpContext.Session.GetString("Department")), 0);
-                viewModel.File.FileNumber = "RUDA/" + DeptInitials + "/" + DateTime.Now.Year + "/" + maxnumber;
-
-                if (viewModel != null && viewModel.FileDetails.FileAttachment != null && viewModel.FileDetails.FileAttachment.Length > 0)
+                if (viewModel != null && viewModel.FileAttachments.FileAttachment != null && viewModel.FileAttachments.FileAttachment.Length > 0)
                 {
-                    viewModel.FileDetails.AttachmentName = viewModel.File.FileNumber + "_" + viewModel.FileDetails.AttachmentName + Path.GetExtension(viewModel.FileDetails.FileAttachment.FileName);
-                    viewModel.FileDetails.AttachmentPath = UploadFile(viewModel.FileDetails.FileAttachment, viewModel.File.FileNumber, viewModel.FileDetails.AttachmentName);
+                    viewModel.FileAttachments.AttachmentName = viewModel.File.FileNumber + "_" + viewModel.FileAttachments.AttachmentName + Path.GetExtension(viewModel.FileAttachments.FileAttachment.FileName);
+                    viewModel.FileAttachments.AttachmentPath = UploadFile(viewModel.FileAttachments.FileAttachment, viewModel.File.FileNumber, viewModel.FileAttachments.AttachmentName);
                 }
                 else
                 {
-                    viewModel.FileDetails.AttachmentName = string.Empty;
-                    viewModel.FileDetails.AttachmentPath = string.Empty;
+                    viewModel.FileAttachments.AttachmentName = string.Empty;
+                    viewModel.FileAttachments.AttachmentPath = string.Empty;
                 }
 
-                viewModel.File.FileStatus = 2;
-                viewModel.File.OriginatedBy = UserID;
+                viewModel.File.InitiatedBy = UserID;
+                viewModel.File.FileStatus = 1;
                 viewModel.FileDetails.MarkedDate = DateTime.Now.Date;
                 viewModel.FileDetails.Comments = string.Empty;
 
@@ -134,7 +141,7 @@ namespace FCMS_RUDA.Controllers
                 return RedirectToAction("Logout", "Users");
             }
 
-            EFile file = new EFileDAL().GetFilebyID(FileID);
+            EFile file = new EFileDAL().GetFilebyIDforView(FileID);
 
             List<DocumentPriority> listPriority = new FilesDAL().GetAllDocumentPriorities();
             ViewBag.ListPriority = listPriority;
@@ -142,7 +149,94 @@ namespace FCMS_RUDA.Controllers
             List<DocumentType> listtypes = new FilesDAL().GetAllDocumentTypes();
             ViewBag.ListTypes = listtypes;
 
+            List<DocumentStatus> listStatuses = new FilesDAL().GetAllDocumentStatus();
+            ViewBag.ListStatus = listStatuses;
+
             return View(file);
+        }
+
+        public IActionResult UpdateFile(int FileID)
+        {
+            if (HttpContext.Session.GetString("Name") == null)
+            {
+                TempData["Session"] = "Your Session has expired. Please Login again";
+                return RedirectToAction("Logout", "Users");
+            }
+
+            EFileViewModel viewModel = new EFileDAL().GetFilebyIDforUpdate(FileID);
+
+            List<DocumentPriority> listPriority = new FilesDAL().GetAllDocumentPriorities();
+            ViewBag.ListPriority = listPriority;
+
+            List<Department> lstdept = new UsersDAL().GetAllDepartments();
+            ViewBag.ListDepts = lstdept;
+
+            List<Users> listUsers = null;// new UsersDAL().GetUsersForNewFileMark(Convert.ToInt32(HttpContext.Session.GetString("Department")), Convert.ToInt32(HttpContext.Session.GetString("ID")));
+            ViewBag.ListUsers = listUsers;
+
+            List<DocumentType> listtypes = new FilesDAL().GetAllDocumentTypes();
+            ViewBag.ListTypes = listtypes;
+
+            List<DocumentStatus> listStatuses = new FilesDAL().GetAllDocumentStatus();
+            ViewBag.ListStatus = listStatuses;
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public IActionResult UpdateFile(EFileViewModel viewModel)
+        {
+            List<DocumentPriority> listPriority = new FilesDAL().GetAllDocumentPriorities();
+            ViewBag.ListPriority = listPriority;
+
+            List<Users> listUsers = new UsersDAL().GetUsersForNewFileMark(Convert.ToInt32(HttpContext.Session.GetString("Department")), Convert.ToInt32(HttpContext.Session.GetString("ID")));
+            ViewBag.ListUsers = listUsers;
+
+            List<DocumentType> listtypes = new FilesDAL().GetAllDocumentTypes();
+            ViewBag.ListTypes = listtypes;
+
+            List<DocumentStatus> listStatuses = new FilesDAL().GetAllDocumentStatus();
+            ViewBag.ListStatus = listStatuses;
+
+            int UserID = Convert.ToInt32(HttpContext.Session.GetString("ID"));
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View();
+                }
+
+                if (viewModel != null && viewModel.FileAttachments.FileAttachment != null && viewModel.FileAttachments.FileAttachment.Length > 0)
+                {
+                    viewModel.FileAttachments.AttachmentName = viewModel.File.FileNumber + "_" + viewModel.FileAttachments.AttachmentName + Path.GetExtension(viewModel.FileAttachments.FileAttachment.FileName);
+                    viewModel.FileAttachments.AttachmentPath = UploadFile(viewModel.FileAttachments.FileAttachment, viewModel.File.FileNumber, viewModel.FileAttachments.AttachmentName);
+                }
+                else
+                {
+                    viewModel.FileAttachments.AttachmentName = string.Empty;
+                    viewModel.FileAttachments.AttachmentPath = string.Empty;
+                }
+
+                viewModel.FileDetails.MarkedDate = DateTime.Now.Date;
+
+                Int64 result = new EFileDAL().UpdateFile(viewModel, UserID);
+
+                if (result > 0)
+                {
+                    TempData["Success"] = "File Updated successfully!";
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    ViewBag.Message = "Error Occured while saving Record. Please Try Again!";
+                    return View();
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Message = "Error Occured while saving Record. Please Try Again!";
+                return View();
+            }
         }
 
         #region SFTP Functions
@@ -184,7 +278,7 @@ namespace FCMS_RUDA.Controllers
             finally { client.Disconnect(); }
         }
 
-        public IActionResult DownloadFile(string remoteFilename)
+        public IActionResult DownloadFile(string remoteFilename, string remoteFilePath)
         {
             var config = new ConfigurationBuilder().AddJsonFile("appsettings.Development.json").Build();
 
@@ -204,7 +298,7 @@ namespace FCMS_RUDA.Controllers
                 {
                     client.Connect();
 
-                    string RemoteFilePath = ftp.BaseDirectory + "//" + remoteFilename;
+                    string RemoteFilePath = remoteFilePath.Replace("//172.16.0.6", ""); //ftp.BaseDirectory + "//" + remoteFilename;
                     byte[] fileBytes = client.ReadAllBytes(RemoteFilePath);
                     return File(fileBytes, "application/force-download", remoteFilename);
                 }

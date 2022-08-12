@@ -1,9 +1,9 @@
 ﻿@using Microsoft.AspNetCore.Http;
 @using FCMS_RUDA.Models;
-@using BLL;
+@using com.ruda.Efile.Domain;
 
 @inject IHttpContextAccessor HttpContextAccessor
-@model BLL.EFile
+@model com.ruda.Efile.Domain.EFile
 
 @{
     ViewData["Title"] = "File Details";
@@ -12,85 +12,123 @@
 
 <div class="row">
     <div class="col-md-12">
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-body">
-                <div class="row">
+                <div class="row" style="margin-top: -5px;margin-bottom: -40px;">
                     <div class="col-md-6">
-                        <a asp-action="Index">Back</a>
+                        <a href='javascript:history.go(-1)'>Back</a>
                     </div>
                     <div class="col-md-6 text-end">
                         <div class="form-group">
                             @if (permissions.Any(x => x.ScreenID == 6 && x.PPrint == true))
                             {
-                                <a class="btn btn-outline-primary btn-sm" href="#"> &nbsp;&nbsp;Export</a>
+                                <a class="btn btn-outline-primary btn-sm" href="#">Export</a>
                             }
                             &nbsp;
-                            @if (permissions.Any(x => x.ScreenID == 6 && x.PUpdate == true))
+                            @if (permissions.Any(x => x.ScreenID == 6 && x.PUpdate == true && Model.FileDetails.Any(x => x.MarkedTo == Convert.ToInt32(HttpContextAccessor.HttpContext.Session.GetString("ID")))))
                             {
-                                <a class="btn btn-outline-primary btn-sm" href="@Url.Action("UpdateFile", "EFile", new { FileID = Model.ID })"> &nbsp;&nbsp;Update</a>
+                                <a class="btn btn-outline-primary btn-sm" href="@Url.Action("UpdateFile", "EFile", new { FileID = Model.ID })">Update</a>
                             }
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
                 <div class="row">
-                    <input asp-for="ID" class="form-control rounded-0" type="hidden" />
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="FileDate" class="control-label required"></label>
-                            <input asp-for="FileDate" class="form-control rounded-0" type="date" disabled />
-                            <span asp-validation-for="FileDate" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="FileNumber" class="control-label required"></label>
-                            <input asp-for="FileNumber" class="form-control rounded-0" readonly />
-                            <span asp-validation-for="FileNumber" class="text-danger"></span>
-                        </div>
+                    <div class="col-12 d-flex align-items-center">
+                        <h5 class="mb-0">File/Document Details</h5>
                     </div>
                 </div>
+            </div>
+            <div class="card-body">
+                <div class="info-container">
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <span class="fw-bold me-2">@Html.DisplayNameFor(x => x.FileDate):</span>
+                                    <span id="CustCNIC">@Model.FileDate.ToLongDateString()</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <span class="fw-bold me-2">@Html.DisplayNameFor(x => x.FileNumber):</span>
+                                    <span id="CustCNIC">@Html.DisplayFor(x => x.FileNumber)</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="mb-3">
+                            <span class="fw-bold me-2">@Html.DisplayNameFor(x => x.InitiatedBy):</span>
+                            <span id="CustCNIC">@Html.DisplayFor(x => x.OriginatedByName)</span>
+                        </li>
+                        <li class="mb-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <span class="fw-bold me-2">@Html.DisplayNameFor(x => x.FilePriority):</span>
+                                    <span id="CustCNIC">@Html.DisplayFor(x => x.FilePriorityName)</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <span class="fw-bold me-2">@Html.DisplayNameFor(x => x.FileType):</span>
+                                    <span id="CustCNIC">@Html.DisplayFor(x => x.FileTypeName)</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="mb-3">
+                            <span class="fw-bold me-2">@Html.DisplayNameFor(x => x.FileStatus):</span>
+                            <span id="CustCNIC">@Html.DisplayFor(x => x.FileStatusName)</span>
+                        </li>
+                        <li class="mb-3">
+                            <span class="fw-bold me-2">@Html.DisplayNameFor(x => x.Subject):</span>
+                            <span id="CustCNIC">@Html.DisplayFor(x => x.Subject)</span>
+                        </li>
+                        <li class="mb-3">
+                            <span class="fw-bold me-2">@Html.DisplayNameFor(x => x.FileBody):</span>
+                            <pre class="preTag">@Html.DisplayFor(x => x.FileBody)</pre>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
                 <div class="row">
-                    <div class="form-group col-md-4">
-                        <label asp-for="FilePriority" class="control-label required"></label>
-                        <select asp-for="FilePriority" class="form-control rounded-0" disabled>
-                            <option value="0">Select...</option>
-                            @foreach (var item in ViewBag.ListPriority)
+                    <div class="col-12 d-flex align-items-center">
+                        <h5 class="mb-0">Attachments</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table">
+                    <table class="table table-bordered align-items-center mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-sm text-primary text-center opacity-9">Attachment Name</th>
+                                <th class="text-sm text-primary text-center opacity-9">Download</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.FileAttachments)
                             {
-                                <option value="@item.ID">@item.Description</option>
+                                <tr>
+                                    <td class="text-center">
+                                        <p class="text-xs font-weight-bold mb-0">@item.AttachmentName</p>
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="@Url.Action("DownloadFile","EFile", new {remoteFilename = item.AttachmentName, remoteFilePath = item.AttachmentPath })" class="text-xs font-weight-bold mb-0" data-toggle="tooltip" data-original-title="Download File">
+                                            <i class="fas fa-file-pdf text-lg me-1" aria-hidden="true"></i>
+                                            Download
+                                        </a>
+                                    </td>
+                                </tr>
                             }
-                        </select>
-                        <span asp-validation-for="FilePriority" class="text-danger"></span>
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label asp-for="FileType" class="control-label required"></label>
-                        <select asp-for="FileType" class="form-control rounded-0" disabled>
-                            <option value="0">Select...</option>
-                            @foreach (var item in ViewBag.ListTypes)
-                            {
-                                <option value="@item.ID">@item.Description</option>
-                            }
-                        </select>
-                        <span asp-validation-for="FileType" class="text-danger"></span>
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label asp-for="OriginatedByName" class="control-label required"></label>
-                        <input asp-for="OriginatedByName" class="form-control rounded-0" readonly />
-                        <span asp-validation-for="OriginatedByName" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="form-group col-md-12">
-                        <label asp-for="Subject" class="control-label required"></label>
-                        <input asp-for="Subject" class="form-control rounded-0" readonly />
-                        <span asp-validation-for="Subject" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="form-group col-md-12">
-                        <label asp-for="FileBody" class="control-label required"></label>
-                        <textarea asp-for="FileBody" class="form-control rounded-0" rows="10" cols="50" readonly></textarea>
-                        <span asp-validation-for="FileBody" class="text-danger"></span>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -98,7 +136,7 @@
 </div>
 <hr />
 <div class="row">
-    <div class="col-12">
+    <div class="col-md-12">
         <div class="card mb-4">
             <div class="card-header pb-0">
                 <div class="row">
@@ -107,10 +145,13 @@
                     </div>
                 </div>
             </div>
-            <div class="card-body px-0 pt-0 pb-2">
+            <div class="card-body">
                 <div class="table-responsive p-0">
                     <table class="table align-items-center mb-0">
                         <tbody>
+                            @{
+                                int count = 2;
+                            }
                             @foreach (var item in Model.FileDetails)
                             {
                                 <tr>
@@ -118,21 +159,32 @@
                                         <style>
                                             .internal-para {
                                                 border: 1px solid #d6dade;
-                                                min-height: 200px;
-                                                background: #e9ecef;
+                                                min-height: 150px;
+                                                /*background: #e9ecef;*/
                                             }
                                         </style>
                                         <div class="container">
                                             <div class="row">
-                                                <div class="col-12 bg-dark text-white">Para no @item.ID</div>
+                                                <div class="col-12 bg-dark text-white">Para no @count</div>
                                                 <div class="col-12 internal-para">
-                                                    <p class="text-decoration-underline">@item.ForwardedToName</p>
-                                                    <p>@item.Comments</p>
+                                                    <textarea asp-for="@item.Comments" class="form-control rounded-0" rows="4" readonly></textarea>
+                                                    <div class="d-flex justify-content-between pt-2">
+                                                        <p class="text-decoration-underline text-sm">Name: @item.MarkedToName</p>
+                                                        @if (item.RemarksDate == DateTime.MinValue)
+                                                        {
+                                                            <p class="text-decoration-underline text-sm">Date:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </p>
+                                                        }
+                                                        else
+                                                        {
+                                                            <p class="text-decoration-underline text-sm">Date: @item.RemarksDate.ToString("D")</p>
+                                                        }
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </td>
                                 </tr>
+                                count++;
                             }
                         </tbody>
                     </table>

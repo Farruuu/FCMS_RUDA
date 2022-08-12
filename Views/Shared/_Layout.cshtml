@@ -1,6 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Http;
 @using FCMS_RUDA.Models;
-@using BLL;
+@using com.ruda.Efile.Domain;
 
 @inject IHttpContextAccessor HttpContextAccessor
 
@@ -44,7 +44,7 @@
                     {
                         <li><a href="@Url.Action("Index", "Home")">Dashboard</a></li>
                     }
-                    @if (permissions.Any(x => x.ModuleID == 2))
+                    @if (permissions.Any(x => x.ModuleID == 2 && x.PView == true))
                     {
                         <li class='sub-menu'>
                             <a href="#">User Management<div class='fa fa-caret-down right'></div></a>
@@ -57,7 +57,6 @@
                                 {
                                     <li><a href="@Url.Action("Index", "Users")" class="text-sm text-sm-left">Users List</a></li>
                                 }
-
                                 @if (permissions.Any(x => x.ScreenID == 4 && x.PView == true))
                                 {
                                     <li><a href="@Url.Action("UserRoles", "Users")" class="text-sm text-sm-left">User Types</a></li>
@@ -154,7 +153,7 @@
                             <a href="javascript:;" class="nav-link text-white font-weight-bold px-0">
                                 <div class="flex-lg-grow-1">
                                     <span class="fw-semibold d-block"><i class="fa fa-user me-sm-1"></i>@HttpContextAccessor.HttpContext.Session.GetString("Name").ToString()</span>
-                                    <small class="fw-semibold d-block">@HttpContextAccessor.HttpContext.Session.GetString("DesignationName").ToString()</small>
+                                    <small class="fw-semibold d-block">@HttpContextAccessor.HttpContext.Session.GetString("DesignationName").ToString() - @HttpContextAccessor.HttpContext.Session.GetString("DeptInitials").ToString()</small>
                                 </div>
                             </a>
                         </li>
