@@ -32,7 +32,6 @@
                     <thead>
                         <tr>
                             <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">User</th>
-                            <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">Function</th>
                             <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">Role</th>
                             <th class="text-uppercase text-secondary text-sm font-weight-bolder opacity-7">Status</th>
                             @if (permissions.Any(x => x.ScreenID == 3 && x.PUpdate == true))
@@ -48,16 +47,7 @@
                                 <td>
                                     <div class="d-flex px-2 py-1">
                                         <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">@item.Name</h6>
-                                            <p class="text-xs text-secondary mb-0">@item.Email</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="d-flex px-2 py-1">
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-xs">@item.DesignationName</h6>
-                                            <p class="text-xs text-secondary mb-0">@item.DepartmentName</p>
+                                            <h6 class="mb-0 text-sm">@item.Email</h6>
                                         </div>
                                     </div>
                                 </td>

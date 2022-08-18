@@ -34,7 +34,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label asp-for="Password" class="form-control-label required"></label>
-                                <input asp-for="Password" class="form-control" type="password">
+                                <input asp-for="Password" class="form-control" type="password" required>
                                 <span asp-validation-for="Password" class="text-danger"></span>
                             </div>
                         </div>
@@ -44,35 +44,22 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label asp-for="Name" class="form-control-label required"></label>
-                                <input asp-for="Name" class="form-control" type="text">
-                                <span asp-validation-for="Name" class="text-danger"></span>
+                                <label asp-for="Name" class="form-control-label required">Name</label>
+                                <input asp-for="Name" class="form-control" type="text" readonly>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label asp-for="Designation" class="form-control-label required"></label>
-                                <select asp-for="Designation" class="form-control rounded-0">
-                                    <option value="0">Select...</option>
-                                    @foreach (var item in ViewBag.Listdesig)
-                                    {
-                                        <option value="@item.ID">@item.Title</option>
-                                    }
-                                </select>
-                                <span asp-validation-for="Designation" class="text-danger"></span>
+                                <label for="DesignationName" class="form-control-label required">Designation</label>
+                                <input id="DesignationName" class="form-control" type="text" readonly>
+                                <input asp-for="Designation" type="hidden" />
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label asp-for="Department" class="form-control-label required"></label>
-                                <select asp-for="Department" class="form-control rounded-0">
-                                    <option value="0">Select...</option>
-                                    @foreach (var item in ViewBag.ListDept)
-                                    {
-                                        <option value="@item.ID">@item.Name</option>
-                                    }
-                                </select>
-                                <span asp-validation-for="Department" class="text-danger"></span>
+                                <label for="DepartmentName" class="form-control-label required">Department</label>
+                                <input id="DepartmentName" class="form-control" type="text" readonly>
+                                <input asp-for="Department" type="hidden">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -128,4 +115,31 @@
     {
         @:window.onload = function () { alert("@ViewBag.Message"); };
     }
+
+    $("#Email").focusout(function () {
+        debugger;
+        var text = $(this).val();
+
+        $.ajax({
+            url: '@Url.Action("LoadEmployeeDetails", "Users")',
+            type: "POST",
+            dataType: "json",
+            async: false,
+            data: { EmailID: text },
+            success: function (result) {
+                debugger;
+                var Json = JSON.parse(result);
+
+                $("#Name").val(Json["Name"]);
+                $("#Designation").val(Json["Designation"]);
+                $("#Department").val(Json["Department"]);
+                $("#DesignationName").val(Json["DesignationName"] + " (" + Json["DesigInitials"] + ")");
+                $("#DepartmentName").val(Json["DepartmentName"] + " (" + Json["DeptInitials"] + ")");
+            },
+            error: function (a) {
+                alert(a);
+            }
+        });
+    });
+
 </script>

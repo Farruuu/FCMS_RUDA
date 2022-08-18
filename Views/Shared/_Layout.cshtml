@@ -6,6 +6,7 @@
 
 @{
     List<UserPermissions> permissions = HttpContextAccessor.HttpContext.Session.GetComplexData<List<UserPermissions>>("Permissions");
+    Employees objemp = HttpContextAccessor.HttpContext.Session.GetComplexData<Employees>("Employee");
 }
 
 <!DOCTYPE html>
@@ -43,6 +44,10 @@
                     @if (permissions.Any(x => x.ModuleID == 1 && x.ScreenID == 1 && x.PView == true))
                     {
                         <li><a href="@Url.Action("Index", "Home")">Dashboard</a></li>
+                    }
+                    @if (permissions.Any(x => x.ModuleID == 1 && x.ScreenID == 1 && x.PView == true))
+                    {
+                        <li><a href="@Url.Action("UpdateUser", "Users", new  { UserID = Convert.ToInt32(@HttpContextAccessor.HttpContext.Session.GetString("ID").ToString())})">My Profile</a></li>
                     }
                     @if (permissions.Any(x => x.ModuleID == 2 && x.PView == true))
                     {
@@ -152,8 +157,8 @@
                         <li class="nav-item d-flex align-items-center">
                             <a href="javascript:;" class="nav-link text-white font-weight-bold px-0">
                                 <div class="flex-lg-grow-1">
-                                    <span class="fw-semibold d-block"><i class="fa fa-user me-sm-1"></i>@HttpContextAccessor.HttpContext.Session.GetString("Name").ToString()</span>
-                                    <small class="fw-semibold d-block">@HttpContextAccessor.HttpContext.Session.GetString("DesignationName").ToString() - @HttpContextAccessor.HttpContext.Session.GetString("DeptInitials").ToString()</small>
+                                    <span class="fw-semibold d-block"><i class="fa fa-user me-sm-1"></i>@objemp.Name</span>
+                                    <small class="fw-semibold d-block">@objemp.DesignationName - @objemp.DeptInitials</small>
                                 </div>
                             </a>
                         </li>

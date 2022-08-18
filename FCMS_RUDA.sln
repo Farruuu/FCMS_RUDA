@@ -5,9 +5,11 @@ VisualStudioVersion = 16.0.32126.315
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FCMS_RUDA", "FCMS_RUDA.csproj", "{90F4E5B6-A67C-4207-8A3C-0E3FB20D3360}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "com.ruda.Efile.DAL", "..\DAL\com.ruda.Efile.DAL.csproj", "{31B9E1B2-06CE-4DEC-8168-730975EFEB19}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "com.ruda.Efile.Domain", "..\com.ruda.Efile.Domain\com.ruda.Efile.Domain.csproj", "{968F5019-A022-44CA-80FD-5B3928B4F083}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "com.ruda.Efile.DAL", "..\com.ruda.Efile.DAL\com.ruda.Efile.DAL.csproj", "{AB91C1ED-78E5-42EE-A4EA-F928F82159A7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "com.ruda.Efile.BusinessLogic", "..\com.ruda.Efile.BusinessLogic\com.ruda.Efile.BusinessLogic.csproj", "{9C086D47-F229-4052-B8A6-C9A66757DCF8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,14 +21,18 @@ Global
 		{90F4E5B6-A67C-4207-8A3C-0E3FB20D3360}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{90F4E5B6-A67C-4207-8A3C-0E3FB20D3360}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{90F4E5B6-A67C-4207-8A3C-0E3FB20D3360}.Release|Any CPU.Build.0 = Release|Any CPU
-		{31B9E1B2-06CE-4DEC-8168-730975EFEB19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{31B9E1B2-06CE-4DEC-8168-730975EFEB19}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{31B9E1B2-06CE-4DEC-8168-730975EFEB19}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{31B9E1B2-06CE-4DEC-8168-730975EFEB19}.Release|Any CPU.Build.0 = Release|Any CPU
 		{968F5019-A022-44CA-80FD-5B3928B4F083}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{968F5019-A022-44CA-80FD-5B3928B4F083}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{968F5019-A022-44CA-80FD-5B3928B4F083}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{968F5019-A022-44CA-80FD-5B3928B4F083}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB91C1ED-78E5-42EE-A4EA-F928F82159A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB91C1ED-78E5-42EE-A4EA-F928F82159A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB91C1ED-78E5-42EE-A4EA-F928F82159A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB91C1ED-78E5-42EE-A4EA-F928F82159A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C086D47-F229-4052-B8A6-C9A66757DCF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C086D47-F229-4052-B8A6-C9A66757DCF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C086D47-F229-4052-B8A6-C9A66757DCF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C086D47-F229-4052-B8A6-C9A66757DCF8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

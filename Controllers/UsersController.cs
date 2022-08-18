@@ -1,13 +1,15 @@
-﻿using com.ruda.Efile.Domain;
+﻿using com.ruda.Efile.BusinessLogic;
+using com.ruda.Efile.Domain;
 using DAL;
 using FCMS_RUDA.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace FCMS_RUDA.Controllers
 {
@@ -24,7 +26,7 @@ namespace FCMS_RUDA.Controllers
         {
             try
             {
-                if (HttpContext.Session.GetString("Name") == null)
+                if (HttpContext.Session.GetString("ID") == null)
                 {
                     TempData["Session"] = "Your Session has expired. Please Login again";
                     return RedirectToAction("Logout", "Users");
@@ -48,50 +50,52 @@ namespace FCMS_RUDA.Controllers
         }
 
         [HttpPost]
-        public IActionResult Login(string email, string password)
+        public async Task<IActionResult> Login(string email, string password)
         {
             try
             {
-                Users objUser = new UsersDAL().SignIn(email, password);
-
-                if (objUser != null && objUser.UserStatus == 1)
+                Employees EmplDetails = await new UsersBLL().GetEmployeeDetails(email);
+                if (EmplDetails != null & EmplDetails.EmpStatus != 6)
                 {
-                    List<UserPermissions> ObjPermissions = new UsersDAL().GetUserPermissions(objUser.UserRole);
-                    SetSession(objUser, ObjPermissions);
+                    Users objUser = new UsersDAL().SignIn(email, password);
+                    if (objUser != null && objUser.UserStatus == 1)
+                    {
+                        List<UserPermissions> ObjPermissions = new UsersDAL().GetUserPermissions(objUser.UserRole);
+                        SetSession(objUser, ObjPermissions, EmplDetails);
 
-                    return RedirectToAction("Index", "Home");
-                }
-                else if (objUser != null && objUser.UserStatus == 0)
-                {
-                    ViewBag.Message = "Your account is disabled!";
-                    return View();
+                        return RedirectToAction("Index", "Home");
+                    }
+                    else if (objUser != null && objUser.UserStatus == 0)
+                    {
+                        ViewBag.Message = "Your account is disabled!";
+                        return View();
+                    }
+                    else
+                    {
+                        ViewBag.Message = "Invalid email or password. Try again!";
+                        return View();
+                    }
                 }
                 else
                 {
-                    ViewBag.Message = "Invalid email or password. Try again!";
+                    ViewBag.Message = "Your account is disabled as per your employement Status. Please Contact HR Department!";
                     return View();
                 }
             }
             catch (Exception ex)
             {
-                ViewBag.Message = "Error Occured while Processing Your request.\n " + ex.Message + ".\n Try again!";
+                ViewBag.Message = "Error Occured while Processing Your request.\n " + ex.Message + ".\n Please Try again!";
                 return View();
             }
         }
 
         public IActionResult AddNewUser()
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");
             }
-
-            List<Department> listDept = new UsersDAL().GetAllDepartments();
-            ViewBag.ListDept = listDept;
-
-            List<Designation> listdesig = new UsersDAL().GetAllDesignations();
-            ViewBag.Listdesig = listdesig;
 
             List<UserRoles> listRoles = new UsersDAL().GetAllUserRoles();
             ViewBag.ListRoles = listRoles;
@@ -100,14 +104,16 @@ namespace FCMS_RUDA.Controllers
         }
 
         [HttpPost]
+        public async Task<JsonResult> LoadEmployeeDetails(string EmailID)
+        {
+            Employees EmplDetails = await new UsersBLL().GetEmployeeDetails(EmailID);
+            var data = JsonConvert.SerializeObject(EmplDetails);
+            return Json(data);
+        }
+
+        [HttpPost]
         public IActionResult AddNewUser(Users user)
         {
-            List<Department> listDept = new UsersDAL().GetAllDepartments();
-            ViewBag.ListDept = listDept;
-
-            List<Designation> listdesig = new UsersDAL().GetAllDesignations();
-            ViewBag.Listdesig = listdesig;
-
             List<UserRoles> listRoles = new UsersDAL().GetAllUserRoles();
             ViewBag.ListRoles = listRoles;
 
@@ -142,21 +148,22 @@ namespace FCMS_RUDA.Controllers
 
         public IActionResult UpdateUser(int UserID)
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");
             }
+
             Users user = new UsersDAL().GetUserByID(UserID);
-
-            List<Department> listDept = new UsersDAL().GetAllDepartments();
-            ViewBag.ListDept = listDept;
-
-            List<Designation> listdesig = new UsersDAL().GetAllDesignations();
-            ViewBag.Listdesig = listdesig;
 
             List<UserRoles> listRoles = new UsersDAL().GetAllUserRoles();
             ViewBag.ListRoles = listRoles;
+
+            Department dept = HttpContext.Session.GetComplexData<List<Department>>("Departments").ToList().First(x => x.ID == user.Department);
+            Designation design = HttpContext.Session.GetComplexData<List<Designation>>("Designations").ToList().First(x => x.ID == user.Designation);
+
+            ViewBag.Department = dept.Name + " (" + dept.Initials + ")";
+            ViewBag.Designation = design.Title + " (" + design.Description + ")";
 
             return View(user);
         }
@@ -164,12 +171,6 @@ namespace FCMS_RUDA.Controllers
         [HttpPost]
         public IActionResult UpdateUser(Users user)
         {
-            List<Department> listDept = new UsersDAL().GetAllDepartments();
-            ViewBag.ListDept = listDept;
-
-            List<Designation> listdesig = new UsersDAL().GetAllDesignations();
-            ViewBag.Listdesig = listdesig;
-
             List<UserRoles> listRoles = new UsersDAL().GetAllUserRoles();
             ViewBag.ListRoles = listRoles;
 
@@ -205,7 +206,7 @@ namespace FCMS_RUDA.Controllers
 
         public IActionResult UserRoles()
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");
@@ -218,7 +219,7 @@ namespace FCMS_RUDA.Controllers
 
         public IActionResult UserPermissions()
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");
@@ -246,13 +247,13 @@ namespace FCMS_RUDA.Controllers
 
         public IActionResult Departments()
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");
             }
 
-            List<Department> listDept = new UsersDAL().GetAllDepartments();
+            List<Department> listDept = HttpContext.Session.GetComplexData<List<Department>>("Departments");
             ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
 
             return View(listDept);
@@ -260,13 +261,13 @@ namespace FCMS_RUDA.Controllers
 
         public IActionResult Designations()
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");
             }
 
-            List<Designation> listDesig = new UsersDAL().GetAllDesignations();
+            List<Designation> listDesig = HttpContext.Session.GetComplexData<List<Designation>>("Designations");
             ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
 
             return View(listDesig);
@@ -282,24 +283,20 @@ namespace FCMS_RUDA.Controllers
 
         #region Session Methods
 
-        public void SetSession(Users user, List<UserPermissions> permissions)
+        public void SetSession(Users user, List<UserPermissions> permissions, Employees employees)
         {
             try
             {
                 HttpContext.Session.SetString("ID", user.ID.ToString());
                 HttpContext.Session.SetString("Email", user.Email.ToString());
                 HttpContext.Session.SetString("password", user.Password.ToString());
-                HttpContext.Session.SetString("UserStatus", user.UserStatus.ToString());
-                HttpContext.Session.SetString("UserRole", user.UserRole.ToString());
                 HttpContext.Session.SetString("Name", user.Name.ToString());
                 HttpContext.Session.SetString("Designation", user.Designation.ToString());
-                HttpContext.Session.SetString("DesignationName", user.DesignationName.ToString());
                 HttpContext.Session.SetString("Department", user.Department.ToString());
-                HttpContext.Session.SetString("DepartmentName", user.DepartmentName.Substring(0, user.DepartmentName.IndexOf("-")).ToString());
-                HttpContext.Session.SetString("DeptInitials", user.DepartmentName[(user.DepartmentName.IndexOf("-") + 1)..].ToString());
-                HttpContext.Session.SetString("WingName", user.WingName.Substring(0, user.WingName.IndexOf("-")).ToString());
-                HttpContext.Session.SetString("WingInitials", user.WingName[(user.WingName.IndexOf("-") + 1)..].ToString());
+                HttpContext.Session.SetString("UserStatus", user.UserStatus.ToString());
+                HttpContext.Session.SetString("UserRole", user.UserRole.ToString());
                 HttpContext.Session.SetComplexData("Permissions", permissions);
+                HttpContext.Session.SetComplexData("Employee", employees);
             }
             catch (Exception ex) { throw new Exception(ex.Message); }
         }
@@ -311,17 +308,18 @@ namespace FCMS_RUDA.Controllers
             user.ID = Convert.ToInt32(HttpContext.Session.GetString("ID"));
             user.Email = HttpContext.Session.GetString("Email").ToString();
             user.Password = HttpContext.Session.GetString("password").ToString();
-            user.UserStatus = Convert.ToInt32(HttpContext.Session.GetString("UserStatus"));
-            user.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
             user.Name = HttpContext.Session.GetString("Name").ToString();
             user.Designation = Convert.ToInt32(HttpContext.Session.GetString("Designation"));
-            user.DesignationName = HttpContext.Session.GetString("DesignationName").ToString();
             user.Department = Convert.ToInt32(HttpContext.Session.GetString("Department"));
-            user.DepartmentName = HttpContext.Session.GetString("DepartmentName").ToString();
-            user.DeptInitials = HttpContext.Session.GetString("DeptInitials").ToString();
-            user.WingName = HttpContext.Session.GetString("WingName").ToString();
-
+            user.UserStatus = Convert.ToInt32(HttpContext.Session.GetString("UserStatus"));
+            user.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
             return user;
+        }
+
+        public Employees GetSessionEmployee()
+        {
+            Employees emp = HttpContext.Session.GetComplexData<Employees>("Employee");
+            return emp;
         }
 
         public List<UserPermissions> GetSessionPermissions()

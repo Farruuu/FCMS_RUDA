@@ -22,7 +22,7 @@ namespace FCMS_RUDA.Controllers
 
         public IActionResult Index()
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");
@@ -36,7 +36,7 @@ namespace FCMS_RUDA.Controllers
 
         public IActionResult AddNewFile()
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");
@@ -120,7 +120,7 @@ namespace FCMS_RUDA.Controllers
 
         public IActionResult ViewFile(int FileID)
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");
@@ -148,7 +148,7 @@ namespace FCMS_RUDA.Controllers
         }
         public IActionResult UpdateFile(int FileID)
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");
@@ -235,7 +235,7 @@ namespace FCMS_RUDA.Controllers
 
         public IActionResult DocumentTypes()
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");
@@ -248,7 +248,7 @@ namespace FCMS_RUDA.Controllers
 
         public IActionResult AddNewDocType()
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");
@@ -294,7 +294,7 @@ namespace FCMS_RUDA.Controllers
 
         public IActionResult UpdateDocType(int DocTypeID)
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");

@@ -1,4 +1,6 @@
-﻿using DAL;
+﻿using com.ruda.Efile.BusinessLogic;
+using com.ruda.Efile.Domain;
+using DAL;
 using FCMS_RUDA.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,15 +23,23 @@ namespace FCMS_RUDA.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");
             }
 
-            DataTable dtdashboard = new FilesDAL().GetDashboardStats();
+            List<Department> ListDepartments = await new OrgBLL().GetDepartmentsList();
+            HttpContext.Session.SetComplexData("Departments", ListDepartments);
+
+            List<Designation> ListDesignations = await new OrgBLL().GetDesignationsList();
+            HttpContext.Session.SetComplexData("Designations", ListDesignations);
+
+            Employees emp = HttpContext.Session.GetComplexData<Employees>("Employee");
+
+            DataTable dtdashboard = new FilesDAL().GetDashboardStats(Convert.ToInt32(HttpContext.Session.GetString("ID")), emp.Department);
             return View(dtdashboard);
         }
 

@@ -1,5 +1,6 @@
 ﻿using com.ruda.Efile.Domain;
 using DAL;
+using FCMS_RUDA.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -15,7 +16,7 @@ namespace FCMS_RUDA.Controllers
     {
         public IActionResult Index()
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");
@@ -28,32 +29,31 @@ namespace FCMS_RUDA.Controllers
 
         public IActionResult FileRequests()
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");
             }
 
             DataTable dt = new EFileDAL().GetPendingFileRequests(Convert.ToInt32(HttpContext.Session.GetString("ID")));
-            //ViewBag.UserRole = Convert.ToInt32(HttpContext.Session.GetString("UserRole"));
-
             return View(dt);
         }
 
         public IActionResult AddNewFile()
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");
             }
+            Employees emp = HttpContext.Session.GetComplexData<Employees>("Employee");
 
-            ViewBag.MarkedToDept = Convert.ToInt32(HttpContext.Session.GetString("Department"));
+            ViewBag.MarkedToDept = Convert.ToInt32(emp.Department);
 
-            List<Department> lstdept = new UsersDAL().GetAllDepartments();
+            List<Department> lstdept = HttpContext.Session.GetComplexData<List<Department>>("Departments");
             ViewBag.ListDepts = lstdept;
 
-            List<Users> listUsers = new UsersDAL().GetUsersForNewFileMark(Convert.ToInt32(HttpContext.Session.GetString("Department")), Convert.ToInt32(HttpContext.Session.GetString("ID")));
+            List<Users> listUsers = new UsersDAL().GetUsersForNewFileMark(Convert.ToInt32(HttpContext.Session.GetString("ID")), emp.Department);
             ViewBag.ListUsers = listUsers;
 
             List<DocumentPriority> listPriority = new FilesDAL().GetAllDocumentPriorities();
@@ -135,7 +135,7 @@ namespace FCMS_RUDA.Controllers
 
         public IActionResult ViewFile(int FileID)
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");
@@ -157,7 +157,7 @@ namespace FCMS_RUDA.Controllers
 
         public IActionResult UpdateFile(int FileID)
         {
-            if (HttpContext.Session.GetString("Name") == null)
+            if (HttpContext.Session.GetString("ID") == null)
             {
                 TempData["Session"] = "Your Session has expired. Please Login again";
                 return RedirectToAction("Logout", "Users");
