@@ -42,6 +42,7 @@
                     <hr class="horizontal dark">
                     <p class="text-uppercase text-sm">Profile Information</p>
                     <div class="row">
+                        <input asp-for="EmpID" type="hidden" />
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label asp-for="Name" class="form-control-label required">Name</label>
@@ -50,8 +51,8 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="DesignationName" class="form-control-label required">Designation</label>
-                                <input id="DesignationName" class="form-control" type="text" readonly>
+                                <label asp-for="Functional_Title" class="form-control-label required"></label>
+                                <input asp-for="Functional_Title" class="form-control" type="text" readonly>
                                 <input asp-for="Designation" type="hidden" />
                             </div>
                         </div>
@@ -69,9 +70,8 @@
                                     <option value="0">Select...</option>
                                     @foreach (var item in ViewBag.ListRoles)
                                     {
-                                        <option value="@item.ID">@item.Description</option>
+                                        <option value="@item.RoleID">@item.Description</option>
                                     }
-
                                 </select>
                                 <span asp-validation-for="UserRole" class="text-danger"></span>
                             </div>
@@ -130,13 +130,16 @@
                 debugger;
                 var Json = JSON.parse(result);
 
+                $("#EmpID").val(Json["EmpID"]);
                 $("#Name").val(Json["Name"]);
                 $("#Designation").val(Json["Designation"]);
                 $("#Department").val(Json["Department"]);
-                $("#DesignationName").val(Json["DesignationName"] + " (" + Json["DesigInitials"] + ")");
+                $("#Functional_Title").val(Json["DesignationName"] + " (" + Json["DesigInitials"] + ")");
                 $("#DepartmentName").val(Json["DepartmentName"] + " (" + Json["DeptInitials"] + ")");
             },
             error: function (a) {
+                debugger;
+
                 alert(a);
             }
         });

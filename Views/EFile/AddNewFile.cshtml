@@ -90,9 +90,9 @@
                         <label asp-for="FileDetails.MarkedTo" class="control-label required"></label>
                         <select asp-for="FileDetails.MarkedTo" class="form-control" id="ForwardedTo">
                             <option value="0">Select...</option>
-                            @foreach (var item in ViewBag.ListUsers)
+                            @foreach (var item in ViewBag.ListEmp)
                             {
-                                <option value="@item.ID">@item.Name - @item.DesignationName - @item.DepartmentName</option>
+                                <option value="@item.EmpID">@item.Name ( @item.DesigInitials - @item.DeptInitials )</option>
                             }
                         </select>
                         <span asp-validation-for="FileDetails.MarkedTo" class="text-danger"></span>

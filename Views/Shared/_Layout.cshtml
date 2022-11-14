@@ -114,13 +114,13 @@
                                 {
                                     <li><a href="@Url.Action("FileRequests", "EFile")" class="text-sm text-sm-left">File Requests</a></li>
                                 }
-                                @if (permissions.Any(x => x.ScreenID == 7 && x.PView == true && x.PAdd == true))
-                                {
-                                    <li><a href="@Url.Action("AddNewFile", "EFile")" class="text-sm text-sm-left">Create New</a></li>
-                                }
                                 @if (permissions.Any(x => x.ScreenID == 6 && x.PView == true))
                                 {
                                     <li><a href="@Url.Action("Index", "EFile")" class="text-sm text-sm-left">My Files</a></li>
+                                }
+                                @if (permissions.Any(x => x.ScreenID == 7 && x.PView == true && x.PAdd == true))
+                                {
+                                    <li><a href="@Url.Action("AddNewFile", "EFile")" class="text-sm text-sm-left">Create New</a></li>
                                 }
                             </ul>
                         </li>

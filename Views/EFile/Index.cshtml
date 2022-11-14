@@ -54,13 +54,13 @@
                                     <p class="text-xs text-center font-weight-bold mb-0">@row["Subject"]</p>
                                 </td>
                                 <td>
-                                    <p class="text-xs text-center font-weight-bold mb-0">@row["MarkedToName"]</p>
+                                    <p class="text-xs text-center font-weight-bold mb-0">@row["MarkedToDesig"] - @row["DeptInitials"]</p>
                                 </td>
                                 <td class="text-center">
                                     @if (permissions.Any(x => x.ScreenID == 6 && x.PView == true))
                                     {
                                         <a href="@Url.Action("ViewFile", "EFile", new { FileID = row["ID"] })" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="View Document Details">
-                                            View
+                                            Open File
                                         </a>
                                     }
                                     @*&nbsp;/&nbsp;

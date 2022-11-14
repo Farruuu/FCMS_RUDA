@@ -1,3 +1,4 @@
+using com.ruda.Efile.Domain;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -28,9 +29,22 @@ namespace FCMS_RUDA
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            services.AddSession(option => { option.IdleTimeout = TimeSpan.FromMinutes(30); });
+            services.AddSession(option =>
+            {
+                option.IdleTimeout = TimeSpan.FromMinutes(30);
+                option.Cookie.Name = ".Efile.Session";
+                option.Cookie.HttpOnly = true;
+                option.Cookie.IsEssential = true;
+            });
+
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddHttpContextAccessor();
+
+            var sftpConfig = Configuration.GetSection("SftpSetting");
+            services.Configure<SftpConfig>(sftpConfig);
+
+            var webAPI = Configuration.GetSection("WebAPI");
+            services.Configure<WebAPI>(webAPI);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

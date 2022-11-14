@@ -6,133 +6,132 @@
 @model com.ruda.Efile.Domain.Users
 
 @{
-    ViewData["Title"] = "Update User";
-    List<UserPermissions> permissions = HttpContextAccessor.HttpContext.Session.GetComplexData<List<UserPermissions>>("Permissions");
+	ViewData["Title"] = "Update User";
+	List<UserPermissions> permissions = HttpContextAccessor.HttpContext.Session.GetComplexData<List<UserPermissions>>("Permissions");
 }
 
 <div class="row">
-    <div class="col-md-12">
-        <div class="card">
-            <form asp-action="UpdateUser">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                @*<div class="card-header pb-0">
-                        <div class="d-flex align-items-center">
-                            <p class="mb-0">Update User</p>
-                        </div>
-                    </div>*@
-                <div class="card-body">
-                    <p class="text-uppercase text-sm">Login Information</p>
-                    <input asp-for="ID" type="hidden" />
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label asp-for="Email" class="form-control-label required"></label>
-                                <input asp-for="Email" class="form-control" type="email" placeholder="jesse@ruda.gov.pk" readonly>
-                                <span asp-validation-for="Email" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label asp-for="Password" class="form-control-label required"></label>
-                                <input asp-for="Password" class="form-control" type="password">
-                                <span asp-validation-for="Password" class="text-danger"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <hr class="horizontal dark">
-                    <p class="text-uppercase text-sm">Profile Information</p>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label asp-for="Name" class="form-control-label required">Name</label>
-                                <input asp-for="Name" class="form-control" type="text" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="DesignationName" class="form-control-label required">Designation</label>
-                                <input id="DesignationName" class="form-control" type="text" value="@ViewBag.Designation" readonly>
-                                <input asp-for="Designation" type="hidden" />
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="DepartmentName" class="form-control-label required">Department</label>
-                                <input id="DepartmentName" class="form-control" type="text" value="@ViewBag.Department" readonly>
-                                <input asp-for="Department" type="hidden">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label asp-for="UserRole" class="form-control-label required"></label>
-                                <select asp-for="UserRole" class="form-control rounded-0">
-                                    <option value="0">Select...</option>
-                                    @foreach (var item in ViewBag.ListRoles)
-                                    {
-                                        <option value="@item.ID">@item.Description</option>
-                                    }
+	<div class="col-md-12">
+		<div class="card">
+			<form asp-action="UpdateUser">
+				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+				@*<div class="card-header pb-0">
+				<div class="d-flex align-items-center">
+				<p class="mb-0">Update User</p>
+				</div>
+				</div>*@
+				<div class="card-body">
+					<p class="text-uppercase text-sm">Login Information</p>
+					<input asp-for="UserID" type="hidden" />
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="Email" class="form-control-label required"></label>
+								<input asp-for="Email" class="form-control" type="email" placeholder="jesse@ruda.gov.pk" readonly>
+								<span asp-validation-for="Email" class="text-danger"></span>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="Password" class="form-control-label required"></label>
+								<input asp-for="Password" class="form-control" type="password">
+								<span asp-validation-for="Password" class="text-danger"></span>
+							</div>
+						</div>
+					</div>
+					<hr class="horizontal dark">
+					<p class="text-uppercase text-sm">Profile Information</p>
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="Name" class="form-control-label required">Name</label>
+								<input asp-for="Name" class="form-control" type="text" readonly>
+							</div>
+						</div>
+						<input asp-for="Designation" type="hidden" />
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="Functional_Title" class="form-control-label"></label>
+								<input asp-for="Functional_Title" class="form-control" type="text" readonly>
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="form-group">
+								<label for="DepartmentName" class="form-control-label required">Department</label>
+								<input id="DepartmentName" class="form-control" type="text" value="@ViewBag.Department" readonly>
+								<input asp-for="Department" type="hidden">
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="form-group">
+								<label asp-for="UserRole" class="form-control-label required"></label>
+								<select asp-for="UserRole" class="form-control rounded-0">
+									<option value="0">Select...</option>
+									@foreach (var item in ViewBag.ListRoles)
+									{
+										<option value="@item.RoleID">@item.Description</option>
+									}
 
-                                </select>
-                                <span asp-validation-for="UserRole" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label asp-for="UserStatus" class="form-control-label required"></label>
-                                <select asp-for="UserStatus" class="form-control rounded-0">
-                                    <option value="0">Select...</option>
-                                    <option value="1">Active</option>
-                                    <option value="2">Inactive</option>
+								</select>
+								<span asp-validation-for="UserRole" class="text-danger"></span>
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="form-group">
+								<label asp-for="UserStatus" class="form-control-label required"></label>
+								<select asp-for="UserStatus" class="form-control rounded-0">
+									<option value="0">Select...</option>
+									<option value="1">Active</option>
+									<option value="2">Inactive</option>
 
-                                </select>
-                                <span asp-validation-for="UserStatus" class="text-danger"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        @if (permissions.Any(x => x.ScreenID == 2 && x.PView == true))
-                        {
-                            <div class="col-md-6">
-                                <a asp-action="Index">Back</a>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="col-md-6">
-                                <a asp-action="Index" asp-controller="Home">Back</a>
-                            </div>
-                        }
-                        @if (permissions.Any(x => x.ScreenID == 3 && x.PUpdate == true))
-                        {
-                            <div class="col-md-6 text-end">
-                                <div class="form-group">
-                                    <input type="submit" value="Update" class="btn btn-outline-success" />
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
+								</select>
+								<span asp-validation-for="UserStatus" class="text-danger"></span>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						@if (permissions.Any(x => x.ScreenID == 2 && x.PView == true))
+						{
+							<div class="col-md-6">
+								<a asp-action="Index">Back</a>
+							</div>
+						}
+						else
+						{
+							<div class="col-md-6">
+								<a asp-action="Index" asp-controller="Home">Back</a>
+							</div>
+						}
+						@if (permissions.Any(x => x.ScreenID == 3 && x.PUpdate == true))
+						{
+							<div class="col-md-6 text-end">
+								<div class="form-group">
+									<input type="submit" value="Update" class="btn btn-outline-success" />
+								</div>
+							</div>
+						}
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
 </div>
 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script type="text/javascript">
-    $(document).ready(function () {
-        var ID = $("#ID").val();
-        var LoggedinUser = @HttpContextAccessor.HttpContext.Session.GetString("ID");
+	$(document).ready(function () {
+		var ID = $("#ID").val();
+		var LoggedinUser = @HttpContextAccessor.HttpContext.Session.GetString("ID");
 
-        if (ID == LoggedinUser & @HttpContextAccessor.HttpContext.Session.GetString("UserRole") != 1)
-        {
-            $("#UserRole").prop("disabled", true);
-            $("#UserStatus").prop("disabled", true);
-        }
-    });
+		if (ID == LoggedinUser & @HttpContextAccessor.HttpContext.Session.GetString("UserRole") != 1) {
+			$("#UserRole").prop("disabled", true);
+			$("#UserStatus").prop("disabled", true);
+		}
+	});
 
-    @if (ViewBag.Message != null)
-    {
-        @:window.onload = function () { alert("@ViewBag.Message"); };
-    }
+	@if (ViewBag.Message != null)
+	{
+		@:window.onload = function () { alert("@ViewBag.Message"); };
+	}
 </script>
 

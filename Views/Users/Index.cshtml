@@ -67,7 +67,7 @@
                                 @if (permissions.Any(x => x.ScreenID == 3 && x.PUpdate == true))
                                 {
                                     <td class="text-center">
-                                        <a href="@Url.Action("UpdateUser", "Users", new  { UserID = item.ID})" class="text-secondary font-weight-bold text-xs">
+                                        <a href="@Url.Action("UpdateUser", "Users", new  { UserID = item.UserID})" class="text-secondary font-weight-bold text-xs">
                                             <i class="fas fa-pencil-alt ms-auto text-dark cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="" aria-hidden="true" data-bs-original-title="Update" aria-label="Update"></i>
                                         </a>
                                     </td>

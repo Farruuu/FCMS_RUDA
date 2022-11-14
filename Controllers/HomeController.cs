@@ -5,6 +5,7 @@ using FCMS_RUDA.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -16,11 +17,11 @@ namespace FCMS_RUDA.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly WebAPI webAPI;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IOptions<WebAPI> _webAPI)
         {
-            _logger = logger;
+            this.webAPI = _webAPI.Value;
         }
 
         public async Task<IActionResult> Index()
@@ -31,15 +32,15 @@ namespace FCMS_RUDA.Controllers
                 return RedirectToAction("Logout", "Users");
             }
 
-            List<Department> ListDepartments = await new OrgBLL().GetDepartmentsList();
+            List<Department> ListDepartments = await new OrgBLL().GetDepartmentsList(webAPI);
             HttpContext.Session.SetComplexData("Departments", ListDepartments);
 
-            List<Designation> ListDesignations = await new OrgBLL().GetDesignationsList();
-            HttpContext.Session.SetComplexData("Designations", ListDesignations);
+            //List<Designation> ListDesignations = await new OrgBLL().GetDesignationsList(webAPI);
+            //HttpContext.Session.SetComplexData("Designations", ListDesignations);
 
             Employees emp = HttpContext.Session.GetComplexData<Employees>("Employee");
 
-            DataTable dtdashboard = new FilesDAL().GetDashboardStats(Convert.ToInt32(HttpContext.Session.GetString("ID")), emp.Department);
+            DataTable dtdashboard = new FilesDAL().GetDashboardStats(emp.EmpID, emp.Department);
             return View(dtdashboard);
         }
 

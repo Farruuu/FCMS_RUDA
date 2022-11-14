@@ -8,6 +8,7 @@
 @{
     ViewData["Title"] = "File Details";
     List<UserPermissions> permissions = HttpContextAccessor.HttpContext.Session.GetComplexData<List<UserPermissions>>("Permissions");
+    Employees emp = HttpContextAccessor.HttpContext.Session.GetComplexData<Employees>("Employee");
 }
 
 <div class="row">
@@ -25,7 +26,7 @@
                                 <a class="btn btn-outline-primary btn-sm" href="#">Export</a>
                             }
                             &nbsp;
-                            @if (permissions.Any(x => x.ScreenID == 6 && x.PUpdate == true && Model.FileDetails.Any(x => x.MarkedTo == Convert.ToInt32(HttpContextAccessor.HttpContext.Session.GetString("ID")))))
+                            @if (permissions.Any(x => x.ScreenID == 6 && x.PUpdate == true && Model.FileDetails.Any(x => x.MarkedTo == emp.EmpID)))
                             {
                                 <a class="btn btn-outline-primary btn-sm" href="@Url.Action("UpdateFile", "EFile", new { FileID = Model.ID })">Update</a>
                             }
@@ -52,41 +53,41 @@
                         <li class="mb-3">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <span class="fw-bold me-2">@Html.DisplayNameFor(x => x.FileDate):</span>
+                                    <span class="fw-bold me-2 text-decoration-underline">@Html.DisplayNameFor(x => x.FileDate):</span>
                                     <span id="CustCNIC">@Model.FileDate.ToLongDateString()</span>
                                 </div>
                                 <div class="col-md-6">
-                                    <span class="fw-bold me-2">@Html.DisplayNameFor(x => x.FileNumber):</span>
+                                    <span class="fw-bold me-2 text-decoration-underline">@Html.DisplayNameFor(x => x.FileNumber):</span>
                                     <span id="CustCNIC">@Html.DisplayFor(x => x.FileNumber)</span>
                                 </div>
                             </div>
                         </li>
                         <li class="mb-3">
-                            <span class="fw-bold me-2">@Html.DisplayNameFor(x => x.InitiatedBy):</span>
+                            <span class="fw-bold me-2 text-decoration-underline">@Html.DisplayNameFor(x => x.InitiatedBy):</span>
                             <span id="CustCNIC">@Html.DisplayFor(x => x.OriginatedByName)</span>
                         </li>
                         <li class="mb-3">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <span class="fw-bold me-2">@Html.DisplayNameFor(x => x.FilePriority):</span>
+                                    <span class="fw-bold me-2 text-decoration-underline">@Html.DisplayNameFor(x => x.FilePriority):</span>
                                     <span id="CustCNIC">@Html.DisplayFor(x => x.FilePriorityName)</span>
                                 </div>
                                 <div class="col-md-6">
-                                    <span class="fw-bold me-2">@Html.DisplayNameFor(x => x.FileType):</span>
+                                    <span class="fw-bold me-2 text-decoration-underline">@Html.DisplayNameFor(x => x.FileType):</span>
                                     <span id="CustCNIC">@Html.DisplayFor(x => x.FileTypeName)</span>
                                 </div>
                             </div>
                         </li>
                         <li class="mb-3">
-                            <span class="fw-bold me-2">@Html.DisplayNameFor(x => x.FileStatus):</span>
+                            <span class="fw-bold me-2 text-decoration-underline">@Html.DisplayNameFor(x => x.FileStatus):</span>
                             <span id="CustCNIC">@Html.DisplayFor(x => x.FileStatusName)</span>
                         </li>
                         <li class="mb-3">
-                            <span class="fw-bold me-2">@Html.DisplayNameFor(x => x.Subject):</span>
+                            <span class="fw-bold me-2 text-decoration-underline">@Html.DisplayNameFor(x => x.Subject):</span>
                             <span id="CustCNIC">@Html.DisplayFor(x => x.Subject)</span>
                         </li>
                         <li class="mb-3">
-                            <span class="fw-bold me-2">@Html.DisplayNameFor(x => x.FileBody):</span>
+                            <span class="fw-bold me-2 text-decoration-underline">@Html.DisplayNameFor(x => x.FileBody):</span>
                             <pre class="preTag">@Html.DisplayFor(x => x.FileBody)</pre>
                         </li>
                     </ul>

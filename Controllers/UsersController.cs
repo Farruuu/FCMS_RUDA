@@ -4,7 +4,9 @@ using DAL;
 using FCMS_RUDA.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -15,11 +17,10 @@ namespace FCMS_RUDA.Controllers
 {
     public class UsersController : Controller
     {
-        private readonly ILogger<UsersController> _logger;
-
-        public UsersController(ILogger<UsersController> logger)
+        private readonly WebAPI webAPI;
+        public UsersController(IOptions<WebAPI> _webAPI)
         {
-            _logger = logger;
+            this.webAPI = _webAPI.Value;
         }
 
         public IActionResult Index()
@@ -54,20 +55,37 @@ namespace FCMS_RUDA.Controllers
         {
             try
             {
-                Employees EmplDetails = await new UsersBLL().GetEmployeeDetails(email);
-                if (EmplDetails != null & EmplDetails.EmpStatus != 6)
+                if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
                 {
-                    Users objUser = new UsersDAL().SignIn(email, password);
-                    if (objUser != null && objUser.UserStatus == 1)
+                    ViewBag.Message = "Email / Password missing!";
+                    return View();
+                }
+
+                Users objUser = new UsersDAL().SignIn(email, password);
+                if (objUser != null && objUser.UserStatus == 1)
+                {
+
+                    Employees EmplDetails = await new UsersBLL().GetEmployeeDetails(email, webAPI);
+
+                    if (EmplDetails != null & EmplDetails.EmpStatus != 6)
                     {
                         List<UserPermissions> ObjPermissions = new UsersDAL().GetUserPermissions(objUser.UserRole);
-                        SetSession(objUser, ObjPermissions, EmplDetails);
 
+                        if (Convert.ToInt32(HttpContext.Session.GetString("ApproverID")) != 0 && Convert.ToInt32(HttpContext.Session.GetString("ApproverID")) == objUser.EmpID)
+                        {
+                            string RedirectURL = HttpContext.Session.GetString("RedirectURL");
+
+                            HttpContext.Session.Clear();
+                            SetSession(objUser, ObjPermissions, EmplDetails);
+                            return Redirect(RedirectURL);
+                        }
+
+                        SetSession(objUser, ObjPermissions, EmplDetails);
                         return RedirectToAction("Index", "Home");
                     }
                     else if (objUser != null && objUser.UserStatus == 0)
                     {
-                        ViewBag.Message = "Your account is disabled!";
+                        ViewBag.Message = "Your account is disabled as per your employement Status. Please Contact HR Department!";
                         return View();
                     }
                     else
@@ -78,7 +96,7 @@ namespace FCMS_RUDA.Controllers
                 }
                 else
                 {
-                    ViewBag.Message = "Your account is disabled as per your employement Status. Please Contact HR Department!";
+                    ViewBag.Message = "Your account is disabled!";
                     return View();
                 }
             }
@@ -106,7 +124,7 @@ namespace FCMS_RUDA.Controllers
         [HttpPost]
         public async Task<JsonResult> LoadEmployeeDetails(string EmailID)
         {
-            Employees EmplDetails = await new UsersBLL().GetEmployeeDetails(EmailID);
+            Employees EmplDetails = await new UsersBLL().GetEmployeeDetails(EmailID, webAPI);
             var data = JsonConvert.SerializeObject(EmplDetails);
             return Json(data);
         }
@@ -141,7 +159,6 @@ namespace FCMS_RUDA.Controllers
             catch (Exception ex)
             {
                 ViewBag.Message = ex.Message;
-                _logger.LogError(ex.Message);
                 return View();
             }
         }
@@ -160,10 +177,7 @@ namespace FCMS_RUDA.Controllers
             ViewBag.ListRoles = listRoles;
 
             Department dept = HttpContext.Session.GetComplexData<List<Department>>("Departments").ToList().First(x => x.ID == user.Department);
-            Designation design = HttpContext.Session.GetComplexData<List<Designation>>("Designations").ToList().First(x => x.ID == user.Designation);
-
             ViewBag.Department = dept.Name + " (" + dept.Initials + ")";
-            ViewBag.Designation = design.Title + " (" + design.Description + ")";
 
             return View(user);
         }
@@ -198,7 +212,6 @@ namespace FCMS_RUDA.Controllers
             catch (Exception ex)
             {
                 ViewBag.Message = ex.Message;
-                _logger.LogError(ex.Message);
                 return View();
             }
 
@@ -241,7 +254,21 @@ namespace FCMS_RUDA.Controllers
 
         public IActionResult Logout()
         {
+            int ApproverID = 0;
+            string RedirectURL = string.Empty;
+
+            if (TempData["ApproverID"] != null)
+            {
+                ApproverID = (int)TempData["ApproverID"];
+                RedirectURL = TempData["RedirectURL"].ToString();
+                TempData.Clear();
+            }
+
             HttpContext.Session.Clear();
+
+            HttpContext.Session.SetString("ApproverID", ApproverID.ToString());
+            HttpContext.Session.SetString("RedirectURL", RedirectURL);
+
             return RedirectToAction("Login");
         }
 
@@ -276,8 +303,10 @@ namespace FCMS_RUDA.Controllers
         [HttpPost]
         public JsonResult LoadUsersForFileMarkByDept(string DeptID)
         {
-            List<Users> listUsers = new UsersDAL().GetUsersForNewFileMark(Convert.ToInt32(DeptID), Convert.ToInt32(HttpContext.Session.GetString("ID")));
+            Employees emp = HttpContext.Session.GetComplexData<Employees>("Employee");
+            List<Users> listUsers = new UsersDAL().GetUsersForNewFileMark(Convert.ToInt32(HttpContext.Session.GetString("ID")), emp.Department, emp.Grade);
             var data = JsonConvert.SerializeObject(listUsers);
+
             return Json(data);
         }
 
@@ -287,7 +316,7 @@ namespace FCMS_RUDA.Controllers
         {
             try
             {
-                HttpContext.Session.SetString("ID", user.ID.ToString());
+                HttpContext.Session.SetString("ID", user.UserID.ToString());
                 HttpContext.Session.SetString("Email", user.Email.ToString());
                 HttpContext.Session.SetString("password", user.Password.ToString());
                 HttpContext.Session.SetString("Name", user.Name.ToString());
@@ -305,7 +334,7 @@ namespace FCMS_RUDA.Controllers
         {
             Users user = new Users();
 
-            user.ID = Convert.ToInt32(HttpContext.Session.GetString("ID"));
+            user.UserID = Convert.ToInt32(HttpContext.Session.GetString("ID"));
             user.Email = HttpContext.Session.GetString("Email").ToString();
             user.Password = HttpContext.Session.GetString("password").ToString();
             user.Name = HttpContext.Session.GetString("Name").ToString();
